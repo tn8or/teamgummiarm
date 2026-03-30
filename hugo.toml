@@ -1,14 +1,3 @@
-baseURL = 'https://teamgummiarm.dk/'
+baseURL = 'https://example.org/'
 locale = 'en-us'
-title = 'Team Gummiarm'
-theme = 'hugo-theme-cleanwhite'
-defaultContentLanguage = "da"
-defaultContentLanguageInSubdir = true
-enableRobotsTXT = true
-
-[params]
-  homeSubtitle     = "Classic Superbike hyggerace"
-  omit_categories = false
-  page_view_counter = false
-  algolia_search = false
-  sidebar_about_description = "CSoftware Developer, Open Source Enthusiast and Life Adventurer"
+title = 'My New Hugo Project'
