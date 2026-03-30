@@ -1,0 +1,44 @@
+baseURL = 'https://teamgummiarm.dk/'
+locale = 'da'
+title = 'Team Gummiarm Racing #393'
+theme = 'gokarna'
+
+[params]
+  description = "Classic Superbike Hyggerace"
+
+  # Hero section title (optional - defaults to site.Title)
+  heroTitleLine1 = "Team Gummiarm Racing"  # First line of hero title
+  heroTitleLine2 = "Aprilia RSV Mille #393"
+
+  avatarURL = "/images/avatar.png"
+  avatarSize = "size-m"
+
+[sitemap]
+  changefreq = "weekly"
+  priority = 0.5
+  filename = "sitemap.xml"
+
+socialIcons = [
+  {name = "instagram", url = "https://instagram.com/teamgummiarm"},
+  {name = "facebook", url = "https://facebook.com/teamgummiarm"},
+  {name = "email", url = "mailto:r@teamgummiarm.dk"},
+]
+
+[params.copyright]
+    startYear = 2026
+    owner = "Tommy Eriksen"
+
+[[menu.main]]
+  name = 'Hjem'
+  url = '/'
+  weight = 10
+
+[[menu.main]]
+  name = 'Opslag'
+  url = '/posts'
+  weight = 20
+
+[[menu.main]]
+  name = 'Om'
+  url = '/about/'
+  weight = 40
