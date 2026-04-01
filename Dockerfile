@@ -7,6 +7,6 @@ RUN hugo --minify
 
 FROM nginx:alpine
 
-COPY --from=builder /src/public /usr/share/nginx/html
+COPY --from=builder --chown=nginx:nginx /src/public /usr/share/nginx/html
 
 EXPOSE 80
