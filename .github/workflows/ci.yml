@@ -2,13 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   build-and-publish:
-    runs-on: ubuntu-latest
+    runs-on: teamgummiarm
     permissions:
       contents: read
       packages: write
