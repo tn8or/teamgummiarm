@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-publish:
+  build-and-push:
     runs-on: teamgummiarm
     permissions:
       contents: read
