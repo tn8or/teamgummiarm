@@ -78,6 +78,3 @@ jobs:
               --name ca-teamgummiarm \
               --resource-group rg-tommyeriksen \
               --image ghcr.io/tn8or/teamgummiarm:latest \
-              --registry-server ghcr.io \
-              --registry-username ${{ github.actor }} \
-              --registry-password ${{ secrets.GITHUB_TOKEN }}
