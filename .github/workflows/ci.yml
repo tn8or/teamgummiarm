@@ -76,6 +76,6 @@ jobs:
         with:
           inlineScript: |
             az containerapp update \
-              --name ca-tommyeriksen \
+              --name ca-teamgummiarm \
               --resource-group rg-tommyeriksen \
-              --image ghcr.io/tn8or/tommyeriksen:latest
+              --image ghcr.io/tn8or/teamgummiarm:latest
