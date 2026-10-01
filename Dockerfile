@@ -7,6 +7,9 @@ COPY . .
 #   docker build --build-arg GIT_COMMIT=$(git rev-parse HEAD) .
 ARG GIT_COMMIT=
 ENV HUGO_PARAMS_commit=${GIT_COMMIT}
+# The official image runs as the unprivileged "hugo" user, which can't write
+# to the root-owned /src (build lock, public/). This is a throwaway builder stage.
+USER root
 RUN hugo --minify
 
 # Stage 2: Serve with nginx
