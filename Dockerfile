@@ -1,14 +1,16 @@
+# Stage 1: Build the Hugo site
 FROM ghcr.io/gohugoio/hugo:v0.167.0 AS builder
-
 WORKDIR /src
 COPY . .
-
+# .git is excluded from the build context, so the source revision has to be
+# passed in. CI sets this to github.sha. Locally:
+#   docker build --build-arg GIT_COMMIT=$(git rev-parse HEAD) .
+ARG GIT_COMMIT=
+ENV HUGO_PARAMS_commit=${GIT_COMMIT}
 RUN hugo --minify
 
+# Stage 2: Serve with nginx
 FROM nginx:1.31.6-alpine
-
-COPY --from=builder --chown=nginx:nginx /src/public /usr/share/nginx/html
+COPY --from=builder /src/public /usr/share/nginx/html
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
-COPY nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
-
 EXPOSE 80
