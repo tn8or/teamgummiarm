@@ -1,11 +1,11 @@
-FROM hugomods/hugo:latest AS builder
+FROM hugomods/hugo:0.165.0 AS builder
 
 WORKDIR /src
 COPY . .
 
 RUN hugo --minify
 
-FROM nginx:alpine
+FROM nginx:1.31.6-alpine
 
 COPY --from=builder --chown=nginx:nginx /src/public /usr/share/nginx/html
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
