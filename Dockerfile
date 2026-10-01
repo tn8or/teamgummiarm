@@ -1,4 +1,4 @@
-FROM hugomods/hugo:0.165.0 AS builder
+FROM ghcr.io/gohugoio/hugo:v0.167.0 AS builder
 
 WORKDIR /src
 COPY . .
