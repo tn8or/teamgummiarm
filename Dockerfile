@@ -16,4 +16,5 @@ RUN hugo --minify
 FROM nginx:1.31.6-alpine
 COPY --from=builder /src/public /usr/share/nginx/html
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY nginx/conf.d/ /etc/nginx/conf.d/
 EXPOSE 80
