@@ -74,6 +74,12 @@ jobs:
           ctype=$(docker exec "$name" curl -fsS -o /dev/null -w '%{content_type}' http://127.0.0.1/ci-smoke.md)
           echo "$ctype"
           test "$ctype" = "text/markdown; charset=utf-8"
+          echo "GET /robots.txt is 200 text/plain with a sitemap ..."
+          out=$(docker exec "$name" curl -fsS -w '\n%{http_code} %{content_type}' http://127.0.0.1/robots.txt)
+          echo "$out"
+          echo "$out" | tail -n1 | grep -q '^200 text/plain'
+          echo "$out" | grep -q '^User-agent: \*$'
+          echo "$out" | grep -q '^Sitemap: https://.*/sitemap\.xml$'
 
       # Same inputs as above, so this reuses the cached build.
       - name: Push container

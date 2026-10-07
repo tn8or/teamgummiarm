@@ -2,6 +2,7 @@ baseURL = 'https://teamgummiarm.dk/'
 locale = 'da'
 title = 'Team Gummiarm Racing #393'
 theme = 'gokarna'
+enableRobotsTXT = true
 
 [params]
   description = "Classic Superbike Hyggerace"
