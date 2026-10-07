@@ -1,0 +1,5 @@
+# robots.txt (RFC 9309)
+User-agent: *
+Allow: /
+
+Sitemap: {{ "sitemap.xml" | absURL }}
