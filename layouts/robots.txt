@@ -1,5 +1,7 @@
 # robots.txt (RFC 9309)
+# Content signals (https://contentsignals.org/): all uses allowed.
 User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 Sitemap: {{ "sitemap.xml" | absURL }}
