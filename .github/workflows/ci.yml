@@ -80,6 +80,7 @@ jobs:
             echo "$1 [$2] -> $(echo "$out" | grep -i '^content-type:' | tr -d '\r')"
             echo "$out" | grep -qi "^content-type: $3"
             echo "$out" | grep -qi '^vary: .*accept'
+            echo "$out" | grep -qi '^cache-control: private'
           }
           browser='text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
           for path in / /about/ /posts/; do
