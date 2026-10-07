@@ -74,6 +74,22 @@ jobs:
           ctype=$(docker exec "$name" curl -fsS -o /dev/null -w '%{content_type}' http://127.0.0.1/ci-smoke.md)
           echo "$ctype"
           test "$ctype" = "text/markdown; charset=utf-8"
+          echo "Content negotiation: HTML by default, Markdown on Accept: text/markdown ..."
+          check() { # path, Accept header, expected content type
+            out=$(docker exec "$name" curl -fsS -D - -o /tmp/body -H "Accept: $2" "http://127.0.0.1$1")
+            echo "$1 [$2] -> $(echo "$out" | grep -i '^content-type:' | tr -d '\r')"
+            echo "$out" | grep -qi "^content-type: $3"
+            echo "$out" | grep -qi '^vary: .*accept'
+          }
+          browser='text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+          for path in / /about/ /posts/; do
+            check "$path" "$browser" "text/html"
+            check "$path" "*/*" "text/html"
+            check "$path" "text/markdown" "text/markdown; charset=utf-8"
+            docker exec "$name" head -n 1 /tmp/body | grep -q '^# '
+            check "$path" "text/markdown, text/html;q=0.9" "text/markdown"
+            check "$path" "text/markdown;q=0, text/html" "text/html"
+          done
           echo "GET /robots.txt is 200 text/plain with a sitemap ..."
           out=$(docker exec "$name" curl -fsS -w '\n%{http_code} %{content_type}' http://127.0.0.1/robots.txt)
           echo "$out"
