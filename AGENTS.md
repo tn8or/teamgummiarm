@@ -6,7 +6,7 @@ Hugo site for teamgummiarm.dk: the Team Gummiarm race team site, in Danish, them
 
 Work on this repo is tracked in itsaplan project `WEBS` (MCP: https://itsaplan-api.tommyeriksen.dk/mcp), shared by Claude (label `claude`) and Cursor (label `cursor`). At the start of a session, read the WEBS doc **"Agent coordination rules"** and follow it; it wins if it differs from this file.
 
-- Knowledge lives only in this repo (code-level docs: this file, `docs/`) or in itsaplan (tasks, plans, decisions, notes). Never only in an agent's local memory, scratch files or chat.
+- Knowledge lives only in this repo (code-level docs: this file, plus a `docs/` folder if one is added) or in itsaplan (tasks, plans, decisions, notes). Never only in an agent's local memory, scratch files or chat.
 - All work has a WEBS issue. Create one first if none exists.
 - Only take `unstarted` issues carrying your own label. Claim by re-reading the issue and moving it to `started`. An issue in `started` is owned; leave it alone.
 - When blocked on anything (Tommy, a review, another issue, CI), add the label `waiting` and comment "Waiting on: who/what, and what exactly is needed". Remove it when unblocked.
