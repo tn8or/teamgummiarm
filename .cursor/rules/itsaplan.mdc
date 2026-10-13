@@ -1,0 +1,8 @@
+---
+description: WEBS coordination rules for Cursor (itsaplan)
+alwaysApply: true
+---
+
+You share itsaplan project `WEBS` (MCP: https://itsaplan-api.tommyeriksen.dk/mcp) with Claude. Your label is `cursor`. At session start, read the project doc "Agent coordination rules" and follow it. Knowledge goes only into the repo or itsaplan, never only into your local memory. Only take `unstarted` issues with your label. Claim by moving them to `started`. When you are waiting on anything, add the label `waiting` and comment "Waiting on: …"; remove it when unblocked. Put all notes and questions as comments on the issue. Start branch names, PR titles and commits with `WEBS-N`. Move the issue to `completed` when done. Never leave it `started`.
+
+See `AGENTS.md` for how this repo builds and deploys.
