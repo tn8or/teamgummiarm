@@ -24,7 +24,7 @@ Work on this repo is tracked in itsaplan project `WEBS` (MCP: https://itsaplan-a
 ## Build and deploy
 
 - `hugo --minify` must succeed before pushing. CI also builds the container and smoke-tests it.
-- The commit SHA is passed to Hugo as `HUGO_PARAMS_commit`.
+- The `Dockerfile` accepts a `GIT_COMMIT` build arg and exposes it as `HUGO_PARAMS_commit`, but CI does not pass it yet and no layout uses it.
 - CI runs on a self-hosted runner. PRs from branches in this repo build and push `ghcr.io/tn8or/teamgummiarm:staging` (fork PRs build but don't push); a push to `main` pushes `:latest`, which is what goes live. **Merging to `main` deploys teamgummiarm.dk.**
 - Never push to `main` directly; work via PR.
 - Renovate auto-merges Hugo, Docker image, Actions and submodule bumps. Keep the Hugo version in `Dockerfile` and `.github/workflows/ci.yml` in sync.
