@@ -1,5 +1,5 @@
 # Stage 1: Build the Hugo site
-FROM ghcr.io/gohugoio/hugo:v0.167.0 AS builder
+FROM ghcr.io/gohugoio/hugo:v0.168.0 AS builder
 WORKDIR /src
 COPY . .
 # .git is excluded from the build context, so the source revision has to be
