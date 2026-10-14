@@ -1,6 +1,6 @@
 # Agent guide: teamgummiarm
 
-Hugo site for teamgummiarm.dk: the Team Gummiarm race team site, in Danish, theme gokarna.
+Hugo site for teamgummiarm.dk: the Team Gummiarm race team site, in Danish, theme Bilberry (`themes/bilberry-hugo-theme`). The front page lists all posts newest first (7 per page, `params.paginate`); top nav is built from root pages like `content/about.md` (`[[menu.main]]` is ignored by the theme). The theme's RSS template reads `params.author` as a table, so leave `params.author` unset.
 
 ## How work is coordinated
 
