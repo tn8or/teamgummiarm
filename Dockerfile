@@ -10,7 +10,10 @@ ENV HUGO_PARAMS_commit=${GIT_COMMIT}
 # The official image runs as the unprivileged "hugo" user, which can't write
 # to the root-owned /src (build lock, public/). This is a throwaway builder stage.
 USER root
-RUN hugo --minify
+# Empty = baseURL from hugo.toml (production). PR builds set it to the staging
+# host, because the theme links CSS/JS with absolute baseURL URLs.
+ARG BASE_URL=
+RUN hugo --minify ${BASE_URL:+--baseURL "$BASE_URL"}
 
 # Stage 2: Serve with nginx
 FROM nginx:1.31.6-alpine

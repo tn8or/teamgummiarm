@@ -1,0 +1,6 @@
+{{- /* Page-bundle images use paths relative to the post; resolve them so they also work where the post body is rendered on another page (front page, lists). */ -}}
+{{- $src := .Destination -}}
+{{- if and (not (urls.Parse $src).Scheme) (not (hasPrefix $src "/")) -}}
+  {{- with .PageInner.Resources.Get $src -}}{{- $src = .RelPermalink -}}{{- end -}}
+{{- end -}}
+<img src="{{ $src }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }}>

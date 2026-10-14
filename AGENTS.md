@@ -24,6 +24,8 @@ Work on this repo is tracked in itsaplan project `WEBS` (MCP: https://itsaplan-a
 ## Build and deploy
 
 - `hugo --minify` must succeed before pushing. CI also builds the container and smoke-tests it.
+- The theme links CSS/JS with absolute `baseURL` URLs, so a build for another host needs that baseURL. The `Dockerfile` takes a `BASE_URL` build arg (empty = `hugo.toml`); CI sets it to `https://staging.teamgummiarm.dk/` for PR builds, so `:staging` is self-contained and `:latest` uses production.
+- `layouts/_markup/render-image.html` resolves post-relative image paths (page bundles) so images also work in the post bodies shown on the front page.
 - The `Dockerfile` accepts a `GIT_COMMIT` build arg and exposes it as `HUGO_PARAMS_commit`, but CI does not pass it yet and no layout uses it.
 - CI runs on a self-hosted runner. PRs from branches in this repo build and push `ghcr.io/tn8or/teamgummiarm:staging` (fork PRs build but don't push); a push to `main` pushes `:latest`, which is what goes live. **Merging to `main` deploys teamgummiarm.dk.**
 - Never push to `main` directly; work via PR.

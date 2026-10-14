@@ -51,6 +51,8 @@ jobs:
           platforms: linux/amd64
           load: true
           tags: teamgummiarm:ci
+          build-args: |
+            BASE_URL=${{ github.event_name == 'pull_request' && 'https://staging.teamgummiarm.dk/' || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -107,5 +109,7 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64
+          build-args: |
+            BASE_URL=${{ github.event_name == 'pull_request' && 'https://staging.teamgummiarm.dk/' || '' }}
           tags: ghcr.io/tn8or/teamgummiarm:${{ github.event_name == 'push' && 'latest' || 'staging' }}
           cache-from: type=gha
