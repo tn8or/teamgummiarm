@@ -1,6 +1,6 @@
 # Agent guide: teamgummiarm
 
-Hugo site for teamgummiarm.dk: the Team Gummiarm race team site, in Danish, theme gokarna.
+Hugo site for teamgummiarm.dk: the Team Gummiarm race team site, in Danish, theme Bilberry (`themes/bilberry-hugo-theme`). The front page lists all posts newest first (7 per page, `params.paginate`); top nav is built from root pages like `content/about.md` (`[[menu.main]]` is ignored by the theme). `params.author` must be a table (`{ name, email }`): the theme's RSS template reads `.Author.email` and fails on a string. The theme's `baseof.html` prints the same param straight into `<meta name="author">`, so that tag renders as `map[email:… name:…]`; not overridden here to avoid shadowing the submodule's `baseof.html`.
 
 ## How work is coordinated
 
@@ -24,6 +24,8 @@ Work on this repo is tracked in itsaplan project `WEBS` (MCP: https://itsaplan-a
 ## Build and deploy
 
 - `hugo --minify` must succeed before pushing. CI also builds the container and smoke-tests it.
+- The theme links CSS/JS with absolute `baseURL` URLs, so a build for another host needs that baseURL. The `Dockerfile` takes a `BASE_URL` build arg (empty = `hugo.toml`); CI sets it to `https://staging.teamgummiarm.dk/` for PR builds, so `:staging` is self-contained and `:latest` uses production.
+- `layouts/_markup/render-image.html` resolves post-relative image paths (page bundles) so images also work in the post bodies shown on the front page.
 - The `Dockerfile` accepts a `GIT_COMMIT` build arg and exposes it as `HUGO_PARAMS_commit`, but CI does not pass it yet and no layout uses it.
 - CI runs on a self-hosted runner. PRs from branches in this repo build and push `ghcr.io/tn8or/teamgummiarm:staging` (fork PRs build but don't push); a push to `main` pushes `:latest`, which is what goes live. **Merging to `main` deploys teamgummiarm.dk.**
 - Never push to `main` directly; work via PR.

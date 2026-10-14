@@ -1,48 +1,51 @@
 baseURL = 'https://teamgummiarm.dk/'
 locale = 'da'
 title = 'Team Gummiarm Racing #393'
-theme = 'gokarna'
+theme = 'bilberry-hugo-theme'
+defaultContentLanguage = 'da'
 enableRobotsTXT = true
 
 [params]
   description = "Classic Superbike Hyggerace"
+  author = { name = "Tommy Eriksen", email = "r@teamgummiarm.dk" }
+  keywords ="team gummiarm,classic superbike,hyggerace,aprilia rsv mille"
 
-  # Hero section title (optional - defaults to site.Title)
-  heroTitleLine1 = "Team Gummiarm Racing"  # First line of hero title
-  heroTitleLine2 = "Aprilia RSV Mille #393"
+  # Posts per page on the front page (newest first)
+  paginate = 7
 
-  avatarURL = "/images/avatar.png"
-  avatarSize = "size-m"
+  subtitle = "Classic Superbike Hyggerace · Aprilia RSV Mille #393"
+  customImage = "/images/avatar.png"
+  overlayIcon = "fa-home"
+
+  enableMomentJs = true
+  showFooter = true
+  amountLatestPostsInFooter = 5
+  amountCategoriesInFooter = -1
+  showArchive = false
+  showSocialMedia = true
+  socialMediaLinks = [
+    { link = "https://instagram.com/teamgummiarm", icon = "fab fa-instagram", rel = "me" },
+    { link = "https://facebook.com/teamgummiarm", icon = "fab fa-facebook", rel = "me" },
+    { link = "https://youtube.com/@teamgummiarm", icon = "fab fa-youtube", rel = "me" },
+    { link = "mailto:r@teamgummiarm.dk", icon = "fas fa-envelope" },
+  ]
+  copyrightBy = "Tommy Eriksen"
+  copyrightUseCurrentYear = false
+  copyrightYearOverride = "2026"
+  copyrightUrl = "https://teamgummiarm.dk"
+  creditsText = "Bilberry Hugo Theme"
+  creditsUrl = "https://github.com/Lednerb/bilberry-hugo-theme"
+
+[taxonomies]
+  author   = "author"
+  tag      = "tags"
+  category = "categories"
+  series   = "series"
 
 [sitemap]
   changefreq = "weekly"
   priority = 0.5
   filename = "sitemap.xml"
-
-socialIcons = [
-  {name = "instagram", url = "https://instagram.com/teamgummiarm"},
-  {name = "facebook", url = "https://facebook.com/teamgummiarm"},
-  {name = "email", url = "mailto:r@teamgummiarm.dk"},
-]
-
-[params.copyright]
-    startYear = 2026
-    owner = "Tommy Eriksen"
-
-[[menu.main]]
-  name = 'Hjem'
-  url = '/'
-  weight = 10
-
-[[menu.main]]
-  name = 'Opslag'
-  url = '/posts'
-  weight = 20
-
-[[menu.main]]
-  name = 'Om'
-  url = '/about/'
-  weight = 40
 
 # Markdown copy of every page (index.md next to index.html). nginx serves it
 # instead of the HTML when a client sends Accept: text/markdown.
