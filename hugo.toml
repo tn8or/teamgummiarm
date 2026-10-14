@@ -26,6 +26,7 @@ enableRobotsTXT = true
   socialMediaLinks = [
     { link = "https://instagram.com/teamgummiarm", icon = "fab fa-instagram", rel = "me" },
     { link = "https://facebook.com/teamgummiarm", icon = "fab fa-facebook", rel = "me" },
+    { link = "https://youtube.com/@teamgummiarm", icon = "fab fa-youtube", rel = "me" },
     { link = "mailto:r@teamgummiarm.dk", icon = "fas fa-envelope" },
   ]
   copyrightBy = "Tommy Eriksen"
