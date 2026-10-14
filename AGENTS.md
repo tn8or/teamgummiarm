@@ -1,6 +1,6 @@
 # Agent guide: teamgummiarm
 
-Hugo site for teamgummiarm.dk: the Team Gummiarm race team site, in Danish, theme Bilberry (`themes/bilberry-hugo-theme`). The front page lists all posts newest first (7 per page, `params.paginate`); top nav is built from root pages like `content/about.md` (`[[menu.main]]` is ignored by the theme). The theme's RSS template reads `params.author` as a table, so leave `params.author` unset.
+Hugo site for teamgummiarm.dk: the Team Gummiarm race team site, in Danish, theme Bilberry (`themes/bilberry-hugo-theme`). The front page lists all posts newest first (7 per page, `params.paginate`); top nav is built from root pages like `content/about.md` (`[[menu.main]]` is ignored by the theme). `params.author` must be a table (`{ name, email }`): the theme's RSS template reads `.Author.email` and fails on a string. The theme's `baseof.html` prints the same param straight into `<meta name="author">`, so that tag renders as `map[email:… name:…]`; not overridden here to avoid shadowing the submodule's `baseof.html`.
 
 ## How work is coordinated
 
