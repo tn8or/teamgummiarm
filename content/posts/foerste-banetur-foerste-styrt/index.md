@@ -11,7 +11,7 @@ type = 'post'
 
 Min første trackday føltes som det sikreste sted, jeg nogensinde havde kørt. Om søndagen styrtede jeg.
 
-For nogle år siden var jeg på et kørekursus på bane med instruktør og fandt ud af, at det nok var det sjoveste, jeg kunne lave helt alene. Lidt research og lidt sjælegranskning senere havde jeg købt en dedikeret banecykel og meldt mig til min første trackday.
+For nogle år siden var jeg på et kørekursus på bane med instruktør og fandt ud af, at det nok var det sjoveste, jeg kunne lave helt alene. Lidt research og lidt sjælesøgning senere havde jeg købt en dedikeret banecykel og meldt mig til min første trackday.
 
 ## Fredag aften på Knutstorp
 
@@ -21,7 +21,7 @@ Jeg havde aldrig kørt på banen før, men jeg havde set en stak onboard-videoer
 
 Det. Bedste. Kick. Nogensinde.
 
-Og det føltes helt sikkert. Ingen træer, ingen modkørende og helt sikkert ingen bilister med hovedet i telefonen, der passivt prøver at slå alle omkring sig ihjel. Man kunne bare køre så godt, som evner og mod rakte. Så det gjorde jeg.
+Og det føltes helt sikkert. Ingen træer, ingen modkørende og helt sikkert ingen bilister med hovedet i telefonen, der passivt prøver at slå alle omkring sig ihjel. Man kunne bare fyre til den, som evner og mod rakte. Så det gjorde jeg.
 
 Jeg blev hurtigere for hver session den første dag. Lørdag aften sad jeg med nogle af de andre over en kold øl, byttede historier og sugede stemningen til mig.
 
@@ -29,7 +29,7 @@ Jeg blev hurtigere for hver session den første dag. Lørdag aften sad jeg med n
 
 Søndag morgen var jeg helt oppe at køre. Første session: varme op. Anden session: hurtigere igen. Jeg kunne ikke vente på den tredje, eller på løbet om eftermiddagen, hvor jeg helt sikkert skulle ende langt længere fremme end om lørdagen. Kådheden havde fuldstændig overtaget.
 
-Tredje session, første hele omgang. Jeg kom op bag en langsommere kører og tænkte: "Ham tager jeg lige før hårnålen, der er masser af plads." Jeg satte det op gennem venstresvinget, gav fuld gas, og det næste, jeg vidste, var, at jeg rullede hen ad asfalten i ca. 100 km/t og lyttede til min hjelm redde mit hoved, mens cyklen lavede meget dyre lyde i baggrunden.
+Tredje session, første hele omgang. Jeg kom op bag en langsommere kører og tænkte: "Ham tager jeg lige før hårnålen, der er masser af plads." Jeg satte det op gennem venstresvinget, gav fuld gas - og det næste, jeg vidste, var, at jeg rullede hen ad asfalten i små 100 km/t og lyttede til min hjelm redde mit hoved, mens cyklen lavede meget dyre lyde i baggrunden.
 
 Jeg ved ikke, hvor mange gange jeg rullede. Alt gik i slowmotion, og jeg nåede at have en hel samtale med mig selv, mens jeg ventede på at ligge stille: "Husk at slappe af i kroppen, så den er mere fleksibel. Åh nej, jeg kan ikke lide den lyd, min nye hjelm laver mod asfalten, den er ødelagt nu. Hmm. Jeg tror ikke, jeg bevæger mig mere. Vent lige et sekund og tjek igen. Nej, ligger stadig stille. Så ligger jeg altså på en racerbane. Jeg burde nok flytte mig. Mon jeg kan?"
 
