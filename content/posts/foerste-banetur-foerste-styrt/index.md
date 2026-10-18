@@ -3,6 +3,7 @@ date = '2026-11-23'
 draft = false
 title = 'Første banetur, første styrt'
 type = 'post'
+tags = ['motorcycles', 'lessons-learned']
 +++
 
 ![Tommy i fuld lean gennem et sving på banen en solskinsdag. Foto: Morten Kimer / Kimers Foto](hero.jpg)
