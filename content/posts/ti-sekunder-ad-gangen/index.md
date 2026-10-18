@@ -3,6 +3,7 @@ date = '2026-10-14'
 draft = false
 title = 'Ti sekunder ad gangen'
 type = 'post'
+tags = ['motorcycles']
 +++
 
 ![Tommy på Aprilia RSV i kurve på bane. Foto: Morten Kimer / Kimers Foto](DSC_7733.jpg)
