@@ -3,9 +3,10 @@
   templates, so every post gets a social image without front matter:
   1. the first entry of front matter `images`, else
   2. the first page-bundle image used in the post body, else
-  3. the site-wide `params.images`.
-  Bundle images wider than 1200px are resized; SVG is skipped (social
-  platforms don't render it).
+  3. the site-wide `params.images` (a home-bundle or assets image is
+     processed like a bundle image; anything else is used as a URL).
+  Images wider than 1200px are resized to a 1200px JPEG; SVG in the body is
+  skipped (social platforms don't render it).
 */ -}}
 {{- $imgs := slice -}}
 {{- $res := "" -}}
@@ -22,13 +23,19 @@
     {{- end -}}
   {{- end -}}
 {{- end -}}
+{{- if and (not $res) (not $url) -}}
+  {{- with site.Params.images -}}{{- $url = index (slice | append .) 0 -}}{{- end -}}
+{{- end -}}
+{{- if and (not $res) $url (not (urls.Parse $url).Scheme) -}}
+  {{- $p := strings.TrimPrefix "/" $url -}}
+  {{- with or (site.Home.Resources.Get $p) (resources.Get $p) -}}
+    {{- if eq .MediaType.MainType "image" -}}{{- $res = . -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
 {{- with $res -}}
-  {{- if gt .Width 1200 -}}{{- $res = .Resize "1200x" -}}{{- end -}}
+  {{- if and (ne .MediaType.SubType "svg") (gt .Width 1200) -}}{{- $res = .Resize "1200x jpg q85" -}}{{- end -}}
   {{- $imgs = $imgs | append (dict "Image" $res "RelPermalink" $res.RelPermalink "Permalink" $res.Permalink) -}}
 {{- else -}}
-  {{- if not $url -}}
-    {{- with site.Params.images -}}{{- $url = index (slice | append .) 0 -}}{{- end -}}
-  {{- end -}}
   {{- with $url -}}
     {{- $u := absURL . -}}
     {{- $imgs = $imgs | append (dict "Image" "" "RelPermalink" $u "Permalink" $u) -}}
