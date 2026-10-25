@@ -6,6 +6,9 @@ defaultContentLanguage = 'da'
 enableRobotsTXT = true
 
 [params]
+  # Fallback og:image/twitter:image for pages without a bundle image
+  # (layouts/partials/_funcs/get-page-images.html).
+  images = ["images/avatar.png"]
   description = "Classic Superbike Hyggerace"
   author = { name = "Tommy Eriksen", email = "r@teamgummiarm.dk" }
   keywords ="team gummiarm,classic superbike,hyggerace,aprilia rsv mille"
