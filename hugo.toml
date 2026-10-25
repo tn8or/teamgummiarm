@@ -6,6 +6,9 @@ defaultContentLanguage = 'da'
 enableRobotsTXT = true
 
 [params]
+  # Fallback og:image/twitter:image for pages without a bundle image
+  # (layouts/partials/_funcs/get-page-images.html).
+  images = ["images/avatar.png"]
   description = "Classic Superbike Hyggerace"
   author = { name = "Tommy Eriksen", email = "r@teamgummiarm.dk" }
   keywords ="team gummiarm,classic superbike,hyggerace,aprilia rsv mille"
@@ -59,3 +62,13 @@ enableRobotsTXT = true
   home = ["html", "rss", "markdown"]
   section = ["html", "rss", "markdown"]
   page = ["html", "markdown"]
+
+# Expose the avatar to Hugo's image pipeline so the fallback og:image
+# (params.images) is served resized. Declaring an assets mount drops the
+# default one, so assets/ is mounted explicitly too.
+[[module.mounts]]
+  source = "assets"
+  target = "assets"
+[[module.mounts]]
+  source = "static/images/avatar.png"
+  target = "assets/images/avatar.png"

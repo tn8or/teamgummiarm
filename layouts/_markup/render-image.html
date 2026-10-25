@@ -1,6 +1,31 @@
-{{- /* Page-bundle images use paths relative to the post; resolve them so they also work where the post body is rendered on another page (front page, lists). */ -}}
+{{- /*
+  Page-bundle raster images are resized (WebP, srcset) so posts don't load the
+  multi-MB original; the image links to the original for full size. Paths are
+  resolved to permalinks so they also work where the post body is rendered on
+  another page (front page, lists). Remote images, static files, SVG and GIF render as a
+  plain img.
+*/ -}}
 {{- $src := .Destination -}}
+{{- $res := "" -}}
 {{- if and (not (urls.Parse $src).Scheme) (not (hasPrefix $src "/")) -}}
-  {{- with .PageInner.Resources.Get $src -}}{{- $src = .RelPermalink -}}{{- end -}}
+  {{- $res = .PageInner.Resources.Get $src -}}
 {{- end -}}
-<img src="{{ $src }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }}>
+{{- if and $res (eq $res.MediaType.MainType "image") (not (in (slice "svg" "gif") $res.MediaType.SubType)) -}}
+  {{- $srcset := slice -}}
+  {{- $fallback := "" -}}
+  {{- range $w := slice 480 800 1200 1600 -}}
+    {{- if lt $w $res.Width -}}
+      {{- $img := $res.Resize (printf "%dx webp q80" $w) -}}
+      {{- $srcset = $srcset | append (printf "%s %dw" $img.RelPermalink $w) -}}
+      {{- if eq $w 800 -}}{{- $fallback = $img -}}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if not $fallback -}}
+    {{- $fallback = $res.Resize (printf "%dx webp q80" $res.Width) -}}
+    {{- $srcset = $srcset | append (printf "%s %dw" $fallback.RelPermalink $res.Width) -}}
+  {{- end -}}
+  <a href="{{ $res.RelPermalink }}"><img src="{{ $fallback.RelPermalink }}" srcset="{{ delimit $srcset ", " }}" sizes="(max-width: 800px) 100vw, 800px" width="{{ $fallback.Width }}" height="{{ $fallback.Height }}" style="height: auto" loading="lazy" decoding="async" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }}></a>
+{{- else -}}
+  {{- with $res -}}{{- $src = .RelPermalink -}}{{- end -}}
+  <img src="{{ $src | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy">
+{{- end -}}
