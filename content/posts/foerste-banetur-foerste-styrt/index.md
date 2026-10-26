@@ -2,6 +2,7 @@
 date = '2026-11-23'
 draft = false
 title = 'Første trackday, første styrt'
+description = 'Min første trackday føltes som det sikreste sted, jeg nogensinde havde kørt. Om søndagen rullede jeg hen ad asfalten i små 100 km/t. Helt min egen skyld.'
 type = 'post'
 tags = ['motorcycles', 'lessons-learned']
 +++
