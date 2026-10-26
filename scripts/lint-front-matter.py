@@ -5,6 +5,7 @@ Rules (see README.md):
   - `description` is present and at most 155 characters
   - `tags` holds exactly one series tag (the list is `series` in data/tags.toml)
   - `date` is present and a valid date or date-time
+  - `ogAnchor`, if set, is a Hugo image anchor
 
 Usage: scripts/lint-front-matter.py [repo root]. Exits 1 on any failure.
 """
@@ -14,6 +15,7 @@ import sys
 import tomllib
 
 MAX_DESCRIPTION = 155
+ANCHORS = ["Smart", "Center", "TopLeft", "Top", "TopRight", "Left", "Right", "BottomLeft", "Bottom", "BottomRight"]
 
 
 def front_matter(path):
@@ -56,6 +58,9 @@ def check(fm, series):
         errors.append("date: missing")
     elif not valid_date(fm["date"]):
         errors.append(f"date: not a valid date: {fm['date']!r}")
+    anchor = fm.get("ogAnchor")
+    if anchor is not None and str(anchor).lower() not in (a.lower() for a in ANCHORS):
+        errors.append(f"ogAnchor: {anchor!r} is not one of {', '.join(ANCHORS)}")
     return errors
 
 

@@ -9,7 +9,7 @@ on:
     types: [opened, synchronize, reopened, labeled]
   # Morning build of main, so posts go live on their `date` (buildFuture is
   # off). Cron is UTC: 06:00 UTC is 08:00 in summer, 07:00 UTC is 08:00 in
-  # winter; the gate below skips the run that lands before 08:00 Copenhagen.
+  # winter; the gate below runs only the one that is 08:00 in Copenhagen.
   schedule:
     - cron: "0 6 * * *"
     - cron: "0 7 * * *"
@@ -26,16 +26,23 @@ jobs:
     outputs:
       run: ${{ steps.gate.outputs.run }}
     steps:
-      - name: Skip scheduled runs before 08:00 Europe/Copenhagen
+      - name: Run only the schedule that is 08:00 Europe/Copenhagen
         id: gate
         run: |
-          hour=$(TZ=Europe/Copenhagen date +%H)
-          if [ "${{ github.event_name }}" = schedule ] && [ "$hour" -lt 8 ]; then
-            echo "Scheduled run at ${hour}:xx Copenhagen time, before 08:00: skipping."
-            echo run=false >> "$GITHUB_OUTPUT"
-          else
-            echo run=true >> "$GITHUB_OUTPUT"
+          run=true
+          if [ "${{ github.event_name }}" = schedule ]; then
+            # Summer (CEST, +0200): 06:00 UTC. Winter (CET, +0100): 07:00 UTC.
+            # Picked by cron entry, not by the clock, so a delayed run still counts.
+            case "$(TZ=Europe/Copenhagen date +%z)" in
+              +0200) want="0 6 * * *" ;;
+              *) want="0 7 * * *" ;;
+            esac
+            if [ "${{ github.event.schedule }}" != "$want" ]; then
+              echo "Cron '${{ github.event.schedule }}' isn't 08:00 Copenhagen today ('$want' is): skipping."
+              run=false
+            fi
           fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
 
   build-and-push:
     needs: gate
@@ -74,7 +81,10 @@ jobs:
         id: target
         run: |
           if [ "${{ github.event_name }}" != pull_request ]; then
-            echo tag=latest >> "$GITHUB_OUTPUT"
+            # Only main goes to production, also for a manual run on another branch.
+            if [ "${{ github.ref }}" = refs/heads/main ]; then
+              echo tag=latest >> "$GITHUB_OUTPUT"
+            fi
           elif [ "${{ github.event.pull_request.head.repo.full_name == github.repository && contains(github.event.pull_request.labels.*.name, 'staging') }}" = true ]; then
             echo tag=staging >> "$GITHUB_OUTPUT"
           fi
@@ -150,6 +160,17 @@ jobs:
           echo "$out" | grep -q '^User-agent: \*$'
           echo "$out" | grep -q '^Content-Signal: search=yes, ai-input=yes, ai-train=yes$'
           echo "$out" | grep -q '^Sitemap: https://.*/sitemap\.xml$'
+          if [ -n "${{ steps.target.outputs.staging_url }}" ]; then
+            echo "Staging build is not indexable ..."
+            echo "$out" | grep -q '^Disallow: /$'
+            docker exec "$name" curl -fsS http://127.0.0.1/ | grep -Eq '<meta name="?robots"? content="noindex'
+          else
+            echo "Production build is indexable ..."
+            echo "$out" | grep -q '^Allow: /$'
+            if docker exec "$name" curl -fsS http://127.0.0.1/ | grep -q noindex; then
+              echo "Production page has noindex"; exit 1
+            fi
+          fi
 
       # Same inputs as above, so this reuses the cached build.
       - name: Push container
