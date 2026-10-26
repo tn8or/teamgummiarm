@@ -10,10 +10,16 @@ ENV HUGO_PARAMS_commit=${GIT_COMMIT}
 # The official image runs as the unprivileged "hugo" user, which can't write
 # to the root-owned /src (build lock, public/). This is a throwaway builder stage.
 USER root
-# Empty = baseURL from hugo.toml (production). PR builds set it to the staging
-# host, because the theme links CSS/JS with absolute baseURL URLs.
-ARG BASE_URL=
-RUN hugo --minify ${BASE_URL:+--baseURL "$BASE_URL"}
+# Empty = production (baseURL from hugo.toml, future-dated posts left out).
+# PR builds set the staging URL (the theme links CSS/JS with absolute baseURL
+# URLs, so it has to match the host): future-dated posts are included so they
+# can be previewed, and the site is noindex (params.staging).
+ARG STAGING_URL=
+RUN if [ -n "$STAGING_URL" ]; then \
+      HUGO_PARAMS_staging=true hugo --minify --baseURL "$STAGING_URL" --buildFuture; \
+    else \
+      hugo --minify; \
+    fi
 
 # Stage 2: Serve with nginx
 FROM nginx:1.31.8-alpine

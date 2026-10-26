@@ -1,0 +1,6 @@
+# Tag scheme for posts (same as tommyeriksen.dk). Every post has exactly one
+# series tag, plus optional topic tags. scripts/lint-front-matter.py reads the
+# series list; add a new series here (and a content/tags/<tag>/_index.md with
+# its Danish display title).
+series = ['motorcycles']
+topics = ['leadership', 'lessons-learned', 'ai-in-practice']
