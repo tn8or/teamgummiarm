@@ -16,7 +16,7 @@ ARG BASE_URL=
 RUN hugo --minify ${BASE_URL:+--baseURL "$BASE_URL"}
 
 # Stage 2: Serve with nginx
-FROM nginx:1.31.7-alpine
+FROM nginx:1.31.8-alpine
 COPY --from=builder /src/public /usr/share/nginx/html
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/conf.d/ /etc/nginx/conf.d/
