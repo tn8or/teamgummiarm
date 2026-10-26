@@ -5,12 +5,15 @@
   2. the first page-bundle image used in the post body, else
   3. the site-wide `params.images` (a home-bundle or assets image is
      processed like a bundle image; anything else is used as a URL).
-  Images wider than 1200px are resized to a 1200px JPEG; SVG in the body is
-  skipped (social platforms don't render it).
+  A body image (2) is cropped to a 1200x630 (1.91:1) JPEG; front matter
+  `ogAnchor` picks the crop anchor (Smart, Center, Top, TopLeft, ...; default
+  Smart). Images from 1 and 3 that are wider than 1200px are resized to a
+  1200px JPEG. SVG in the body is skipped (social platforms don't render it).
 */ -}}
 {{- $imgs := slice -}}
 {{- $res := "" -}}
 {{- $url := "" -}}
+{{- $crop := false -}}
 {{- with .Params.images -}}
   {{- $first := index (slice | append .) 0 -}}
   {{- with $.Resources.Get $first -}}{{- $res = . -}}{{- else -}}{{- $url = $first -}}{{- end -}}
@@ -18,7 +21,7 @@
   {{- range findRESubmatch `!\[[^\]]*\]\(([^)\s]+)` .RawContent -}}
     {{- if not $res -}}
       {{- with $.Resources.Get (index . 1) -}}
-        {{- if and (eq .MediaType.MainType "image") (ne .MediaType.SubType "svg") -}}{{- $res = . -}}{{- end -}}
+        {{- if and (eq .MediaType.MainType "image") (ne .MediaType.SubType "svg") -}}{{- $res = . -}}{{- $crop = true -}}{{- end -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
@@ -33,7 +36,9 @@
   {{- end -}}
 {{- end -}}
 {{- with $res -}}
-  {{- if and (ne .MediaType.SubType "svg") (gt .Width 1200) -}}{{- $res = .Resize "1200x jpg q85" -}}{{- end -}}
+  {{- if $crop -}}
+    {{- $res = .Fill (printf "1200x630 %s jpg q85" ($.Params.ogAnchor | default "Smart")) -}}
+  {{- else if and (ne .MediaType.SubType "svg") (gt .Width 1200) -}}{{- $res = .Resize "1200x jpg q85" -}}{{- end -}}
   {{- $imgs = $imgs | append (dict "Image" $res "RelPermalink" $res.RelPermalink "Permalink" $res.Permalink) -}}
 {{- else -}}
   {{- with $url -}}

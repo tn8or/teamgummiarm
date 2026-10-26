@@ -3,6 +3,7 @@ date = '2026-10-20'
 draft = false
 title = 'Nye farver til sæsonen'
 type = 'post'
+description = 'Ny sponsor, ny lak og et par logoer på den gamle Aprilia. Kåben fik glasfiber og maling i garagen, og så ramte vi regnvejret på årets første tur.'
 tags = ['motorcycles']
 +++
 

@@ -1,7 +1,8 @@
 # robots.txt (RFC 9309)
+# Staging builds (params.staging) disallow everything.
 # Content signals (https://contentsignals.org/): all uses allowed.
 User-agent: *
 Content-Signal: search=yes, ai-input=yes, ai-train=yes
-Allow: /
+{{ if site.Params.staging }}Disallow: /{{ else }}Allow: /{{ end }}
 
 Sitemap: {{ "sitemap.xml" | absURL }}

@@ -3,6 +3,7 @@ date = '2026-10-14'
 draft = false
 title = 'Ti sekunder ad gangen'
 type = 'post'
+description = 'Fokus er ikke at tænke på det hele. Det er at vælge, hvad der findes lige nu. På banen varer verden cirka ti sekunder.'
 tags = ['motorcycles']
 +++
 

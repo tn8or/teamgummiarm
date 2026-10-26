@@ -5,13 +5,41 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+    # labeled: adding the `staging` label deploys the PR to staging.
+    types: [opened, synchronize, reopened, labeled]
+  # Morning build of main, so posts go live on their `date` (buildFuture is
+  # off). Cron is UTC: 06:00 UTC is 08:00 in summer, 07:00 UTC is 08:00 in
+  # winter; the gate below skips the run that lands before 08:00 Copenhagen.
+  schedule:
+    - cron: "0 6 * * *"
+    - cron: "0 7 * * *"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Only PR builds cancel each other; a main build always finishes.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  gate:
+    runs-on: teamgummiarm
+    outputs:
+      run: ${{ steps.gate.outputs.run }}
+    steps:
+      - name: Skip scheduled runs before 08:00 Europe/Copenhagen
+        id: gate
+        run: |
+          hour=$(TZ=Europe/Copenhagen date +%H)
+          if [ "${{ github.event_name }}" = schedule ] && [ "$hour" -lt 8 ]; then
+            echo "Scheduled run at ${hour}:xx Copenhagen time, before 08:00: skipping."
+            echo run=false >> "$GITHUB_OUTPUT"
+          else
+            echo run=true >> "$GITHUB_OUTPUT"
+          fi
+
   build-and-push:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
     runs-on: teamgummiarm
     permissions:
       contents: read
@@ -23,6 +51,14 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Lint post front matter
+        run: python scripts/lint-front-matter.py
+
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
@@ -32,9 +68,23 @@ jobs:
       - name: Build site
         run: hugo --minify
 
-      # main pushes :latest (production); PRs from this repo push :staging.
+      # main (push, morning schedule, manual run) pushes :latest (production).
+      # PRs from this repo with the `staging` label push :staging.
+      - name: Decide what to push
+        id: target
+        run: |
+          if [ "${{ github.event_name }}" != pull_request ]; then
+            echo tag=latest >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.pull_request.head.repo.full_name == github.repository && contains(github.event.pull_request.labels.*.name, 'staging') }}" = true ]; then
+            echo tag=staging >> "$GITHUB_OUTPUT"
+          fi
+          # PR builds are always staging builds, pushed or not.
+          if [ "${{ github.event_name }}" = pull_request ]; then
+            echo staging_url=https://staging.teamgummiarm.dk/ >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Log in to GHCR
-        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        if: steps.target.outputs.tag != ''
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
@@ -52,7 +102,7 @@ jobs:
           load: true
           tags: teamgummiarm:ci
           build-args: |
-            BASE_URL=${{ github.event_name == 'pull_request' && 'https://staging.teamgummiarm.dk/' || '' }}
+            STAGING_URL=${{ steps.target.outputs.staging_url }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -103,13 +153,13 @@ jobs:
 
       # Same inputs as above, so this reuses the cached build.
       - name: Push container
-        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        if: steps.target.outputs.tag != ''
         uses: docker/build-push-action@v7
         with:
           context: .
           push: true
           platforms: linux/amd64
           build-args: |
-            BASE_URL=${{ github.event_name == 'pull_request' && 'https://staging.teamgummiarm.dk/' || '' }}
-          tags: ghcr.io/tn8or/teamgummiarm:${{ github.event_name == 'push' && 'latest' || 'staging' }}
+            STAGING_URL=${{ steps.target.outputs.staging_url }}
+          tags: ghcr.io/tn8or/teamgummiarm:${{ steps.target.outputs.tag }}
           cache-from: type=gha
