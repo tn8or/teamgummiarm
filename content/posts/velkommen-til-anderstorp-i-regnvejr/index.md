@@ -2,6 +2,7 @@
 date = '2026-10-27'
 draft = false
 title = 'Velkommen til Anderstorp i regnvejr'
+description = 'Anderstorp er armen i karmen og bundgas til næste sving. Fredag uden rigtig rytme, lørdag som flagpost, og søndag var for våd til mine slicks.'
 type = 'post'
 tags = ['motorcycles']
 +++
