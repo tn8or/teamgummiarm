@@ -1,7 +1,7 @@
 +++
 date = '2026-11-23'
 draft = false
-title = 'Første banetur, første styrt'
+title = 'Første trackday, første styrt'
 type = 'post'
 tags = ['motorcycles', 'lessons-learned']
 +++
