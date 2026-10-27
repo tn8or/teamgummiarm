@@ -7,7 +7,7 @@ Team Gummiarm Racing #393, in Danish. Hugo (theme bilberry), served by nginx in 
 1. Add the post as a page bundle: `content/posts/<slug>/index.md` plus its images.
 2. Open a PR. Add the `staging` label to preview it on https://staging.teamgummiarm.dk/ (future-dated posts are included there).
 3. Merge when it's approved. The merge does not have to wait for the publishing day.
-4. The post goes live at 08:00 Copenhagen time on its `date`: a scheduled build of `main` runs every morning and pushes `:latest`. A post merged on or after its date goes live with that merge.
+4. The post goes live on its `date` at 08:00 Copenhagen time in summer, 07:00 in winter (06:00 UTC): a scheduled build of `main` runs every morning and pushes `:latest`. A post merged on or after its date goes live with that merge.
 
 `date` is read in Europe/Copenhagen, so `date = '2026-11-05'` means 5 November. To publish now or rebuild by hand, run the CI workflow from the Actions tab (workflow_dispatch on `main`).
 
