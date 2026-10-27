@@ -1,0 +1,36 @@
+name: Cleanup
+
+# Old images pile up: every push of :latest / :staging leaves the previous
+# version untagged in GHCR, and every CI build leaves a dangling teamgummiarm:ci
+# image on the runner. The host (k3s) garbage-collects its own images.
+on:
+  schedule:
+    - cron: "0 3 * * 0" # Sundays 03:00 UTC
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Only log what would be deleted
+        type: boolean
+        default: true
+
+jobs:
+  cleanup:
+    runs-on: teamgummiarm
+    permissions:
+      packages: write
+    steps:
+      # Keeps every tagged image and the 10 newest untagged versions. Child
+      # manifests of tagged images (platform images, attestations) are kept,
+      # so :latest and :staging stay pullable.
+      - name: Delete old untagged GHCR versions
+        uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          package: teamgummiarm
+          keep-n-untagged: 10
+          validate: true
+          dry-run: ${{ inputs.dry-run == true }}
+
+      - name: Remove dangling images on the runner
+        if: ${{ inputs.dry-run != true }}
+        run: docker image prune -f
