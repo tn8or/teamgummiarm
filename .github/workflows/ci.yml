@@ -5,8 +5,6 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-    # labeled: adding the `staging` label deploys the PR to staging.
-    types: [opened, synchronize, reopened, labeled]
   # Morning build of main, so posts go live on their `date` (buildFuture is
   # off). Cron is UTC: 06:00 UTC is 08:00 Copenhagen in summer, 07:00 in winter.
   schedule:
@@ -53,7 +51,7 @@ jobs:
         run: hugo --minify
 
       # main (push, morning schedule, manual run) pushes :latest (production).
-      # PRs from this repo with the `staging` label push :staging.
+      # Every PR from this repo pushes :staging; the latest push wins.
       - name: Decide what to push
         id: target
         run: |
@@ -62,7 +60,7 @@ jobs:
             if [ "${{ github.ref }}" = refs/heads/main ]; then
               echo tag=latest >> "$GITHUB_OUTPUT"
             fi
-          elif [ "${{ github.event.pull_request.head.repo.full_name == github.repository && contains(github.event.pull_request.labels.*.name, 'staging') }}" = true ]; then
+          elif [ "${{ github.event.pull_request.head.repo.full_name == github.repository }}" = true ]; then
             echo tag=staging >> "$GITHUB_OUTPUT"
           fi
           # PR builds are always staging builds, pushed or not.
