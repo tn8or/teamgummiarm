@@ -8,11 +8,9 @@ on:
     # labeled: adding the `staging` label deploys the PR to staging.
     types: [opened, synchronize, reopened, labeled]
   # Morning build of main, so posts go live on their `date` (buildFuture is
-  # off). Cron is UTC: 06:00 UTC is 08:00 in summer, 07:00 UTC is 08:00 in
-  # winter; the gate below runs only the one that is 08:00 in Copenhagen.
+  # off). Cron is UTC: 06:00 UTC is 08:00 Copenhagen in summer, 07:00 in winter.
   schedule:
     - cron: "0 6 * * *"
-    - cron: "0 7 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -21,32 +19,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  gate:
-    runs-on: teamgummiarm
-    outputs:
-      run: ${{ steps.gate.outputs.run }}
-    steps:
-      - name: Run only the schedule that is 08:00 Europe/Copenhagen
-        id: gate
-        run: |
-          run=true
-          if [ "${{ github.event_name }}" = schedule ]; then
-            # Summer (CEST, +0200): 06:00 UTC. Winter (CET, +0100): 07:00 UTC.
-            # Picked by cron entry, not by the clock, so a delayed run still counts.
-            case "$(TZ=Europe/Copenhagen date +%z)" in
-              +0200) want="0 6 * * *" ;;
-              *) want="0 7 * * *" ;;
-            esac
-            if [ "${{ github.event.schedule }}" != "$want" ]; then
-              echo "Cron '${{ github.event.schedule }}' isn't 08:00 Copenhagen today ('$want' is): skipping."
-              run=false
-            fi
-          fi
-          echo "run=$run" >> "$GITHUB_OUTPUT"
-
   build-and-push:
-    needs: gate
-    if: needs.gate.outputs.run == 'true'
     runs-on: teamgummiarm
     permissions:
       contents: read
