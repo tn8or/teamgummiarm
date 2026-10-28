@@ -31,4 +31,4 @@ Run it locally with `python3 scripts/lint-front-matter.py`.
 
 ## Staging
 
-PR builds and manual runs on other branches use `https://staging.teamgummiarm.dk/` as baseURL, include future-dated posts and are `noindex`. CI builds and smoke-tests every PR but publishes nothing. To preview a branch, run the CI workflow from the Actions tab on that branch; it pushes `ghcr.io/tn8or/teamgummiarm:staging`, so staging shows the most recent manual run. Merge PRs promptly rather than keeping several open previews.
+PR builds and manual runs on other branches use `https://staging.teamgummiarm.dk/` as baseURL, include future-dated posts and are `noindex`. CI builds and smoke-tests every PR but publishes nothing. To preview a branch, run the CI workflow from the Actions tab on that branch; it pushes `ghcr.io/tn8or/teamgummiarm:staging`, and every build of `main` (merge, morning schedule) also pushes a staging build of `main`, so merged posts can be checked there before their date. Staging shows whichever of the two ran last. Merge PRs promptly rather than keeping several open previews.
