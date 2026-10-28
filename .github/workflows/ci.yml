@@ -61,21 +61,18 @@ jobs:
         run: hugo --minify
 
       # main (push, morning schedule, manual run) publishes :latest (production).
-      # :staging comes from a manual run on another branch, or from a PR that
-      # the repo owner opened and pushed. Other PRs (agents) only build.
+      # :staging comes only from a manual run on another branch. PRs never
+      # publish: cloud agents push and open PRs as the repo owner, so neither
+      # the PR author nor the actor tells an agent's PR from Tommy's.
       - name: Decide what to publish
         id: target
         env:
           EVENT: ${{ github.event_name }}
           REF: ${{ github.ref }}
-          OWNER_PR: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login == github.repository_owner && github.actor == github.repository_owner }}
         run: |
           if [ "$EVENT" = pull_request ]; then
             # PR builds are always staging builds, published or not.
             echo staging_url=https://staging.teamgummiarm.dk/ >> "$GITHUB_OUTPUT"
-            if [ "$OWNER_PR" = true ]; then
-              echo tag=staging >> "$GITHUB_OUTPUT"
-            fi
           elif [ "$REF" = refs/heads/main ]; then
             echo tag=latest >> "$GITHUB_OUTPUT"
           elif [ "$EVENT" = workflow_dispatch ]; then
