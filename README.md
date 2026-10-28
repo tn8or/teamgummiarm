@@ -5,7 +5,7 @@ Team Gummiarm Racing #393, in Danish. Hugo (theme bilberry), served by nginx in 
 ## Publishing a post
 
 1. Add the post as a page bundle: `content/posts/<slug>/index.md` plus its images.
-2. Open a PR. It is previewed on https://staging.teamgummiarm.dk/ (future-dated posts are included there).
+2. Open a PR, then run the CI workflow from the Actions tab on its branch to preview it on https://staging.teamgummiarm.dk/ (future-dated posts are included there).
 3. Merge when it's approved. The merge does not have to wait for the publishing day.
 4. The post goes live on its `date` at 08:00 Copenhagen time in summer, 07:00 in winter (06:00 UTC): a scheduled build of `main` runs every morning and pushes `:latest`. A post merged on or after its date goes live with that merge.
 
@@ -31,4 +31,4 @@ Run it locally with `python3 scripts/lint-front-matter.py`.
 
 ## Staging
 
-PR builds use `https://staging.teamgummiarm.dk/` as baseURL, include future-dated posts and are `noindex`. Every PR from this repo pushes `ghcr.io/tn8or/teamgummiarm:staging`, so staging shows the most recently pushed PR. Merge PRs promptly rather than keeping several open previews.
+PR builds and manual runs on other branches use `https://staging.teamgummiarm.dk/` as baseURL, include future-dated posts and are `noindex`. CI builds and smoke-tests every PR but publishes nothing. To preview a branch, run the CI workflow from the Actions tab on that branch; it pushes `ghcr.io/tn8or/teamgummiarm:staging`, and every build of `main` (merge, morning schedule) also pushes a staging build of `main`, so merged posts can be checked there before their date. Staging shows whichever of the two ran last. Merge PRs promptly rather than keeping several open previews.
