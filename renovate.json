@@ -22,6 +22,8 @@
       "datasourceTemplate": "github-releases"
     }
   ],
+  "minimumReleaseAge": "2 days",
+  "minimumReleaseAgeBehaviour": "timestamp-optional",
   "automerge": true,
   "automergeType": "pr",
   "platformAutomerge": true,
