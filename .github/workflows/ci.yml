@@ -25,6 +25,7 @@ jobs:
       contents: read
     outputs:
       sha: ${{ steps.commit.outputs.sha }}
+      build_time: ${{ steps.commit.outputs.build_time }}
       tag: ${{ steps.target.outputs.tag }}
       staging_url: ${{ steps.target.outputs.staging_url }}
 
@@ -41,7 +42,12 @@ jobs:
       # The publish job checks out this exact commit.
       - name: Resolve the commit being built
         id: commit
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        # build_time feeds the Hugo layer's cache key. Without it a morning
+        # build of an unchanged main reuses yesterday's cached site, and a
+        # post dated today never goes live (WEBS-14).
+        run: |
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "build_time=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -92,6 +98,7 @@ jobs:
           load: true
           tags: teamgummiarm:ci
           build-args: |
+            BUILD_TIME=${{ steps.commit.outputs.build_time }}
             STAGING_URL=${{ steps.target.outputs.staging_url }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -186,6 +193,7 @@ jobs:
           push: true
           tags: ghcr.io/tn8or/teamgummiarm:${{ needs.build.outputs.tag }}
           build-args: |
+            BUILD_TIME=${{ needs.build.outputs.build_time }}
             STAGING_URL=${{ needs.build.outputs.staging_url }}
           cache-from: type=gha
 
@@ -200,5 +208,6 @@ jobs:
           push: true
           tags: ghcr.io/tn8or/teamgummiarm:staging
           build-args: |
+            BUILD_TIME=${{ needs.build.outputs.build_time }}
             STAGING_URL=https://staging.teamgummiarm.dk/
           cache-from: type=gha
