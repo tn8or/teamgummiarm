@@ -15,11 +15,12 @@ USER root
 # URLs, so it has to match the host): future-dated posts are included so they
 # can be previewed, and the site is noindex (params.staging).
 ARG STAGING_URL=
-# Changes on every CI run, so the Hugo step is never served from the layer
-# cache: buildFuture=false decides on the build day, which the cache key
-# would not otherwise see.
+# Changes on every CI run and is used in the RUN below, so the Hugo step is
+# never served from the layer cache: buildFuture=false decides on the build
+# day, which the cache key would not otherwise see (WEBS-14).
 ARG BUILD_TIME=
-RUN if [ -n "$STAGING_URL" ]; then \
+RUN echo "Building as of ${BUILD_TIME:-now}" && \
+    if [ -n "$STAGING_URL" ]; then \
       HUGO_PARAMS_staging=true hugo --minify --baseURL "$STAGING_URL" --buildFuture; \
     else \
       hugo --minify; \
