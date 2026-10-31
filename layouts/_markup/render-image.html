@@ -27,7 +27,7 @@
     {{- $srcset = $srcset | append (printf "%s %dw" $fallback.RelPermalink $res.Width) -}}
   {{- end -}}
   {{- $full := $res.Fit "3000x3000 q85" -}}
-  <a href="{{ $full.RelPermalink }}"><img src="{{ $fallback.RelPermalink }}" srcset="{{ delimit $srcset ", " }}" sizes="(max-width: 800px) 100vw, 800px" width="{{ $fallback.Width }}" height="{{ $fallback.Height }}" style="height: auto" loading="lazy" decoding="async" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }}></a>
+  <a href="{{ $full.RelPermalink }}"><img class="post-image" src="{{ $fallback.RelPermalink }}" srcset="{{ delimit $srcset ", " }}" sizes="(max-width: 800px) 100vw, 800px" width="{{ $fallback.Width }}" height="{{ $fallback.Height }}" loading="lazy" decoding="async" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }}></a>
 {{- else -}}
   {{- with $res -}}{{- $src = .RelPermalink -}}{{- end -}}
   <img src="{{ $src | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy">
