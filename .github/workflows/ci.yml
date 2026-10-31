@@ -115,6 +115,13 @@ jobs:
           done
           echo "GET / ..."
           docker exec "$name" curl -fsS -o /dev/null -w '%{http_code} %{content_type}\n' http://127.0.0.1/
+          echo "Security headers ..."
+          headers=$(docker exec "$name" curl -fsSI http://127.0.0.1/)
+          echo "$headers" | grep -qi '^strict-transport-security: max-age=31536000; includeSubDomains'
+          csp=$(echo "$headers" | grep -i '^content-security-policy:')
+          echo "$csp" | grep -q "default-src 'self'"
+          ! echo "$csp" | grep -qi 'unsafe-eval'
+          echo "$csp" | grep -q 'https://tracker.metricool.com'
           echo "GET missing page returns 404 ..."
           code=$(docker exec "$name" curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1/ci-smoke-missing)
           test "$code" = 404
