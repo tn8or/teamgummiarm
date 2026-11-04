@@ -14,7 +14,7 @@ timeZone = 'Europe/Copenhagen'
   # Fallback og:image/twitter:image for pages without a bundle image
   # (layouts/partials/_funcs/get-page-images.html).
   images = ["images/avatar.png"]
-  description = "Classic Superbike Hyggerace"
+  description = "Team Gummiarm #393: Tommy Eriksen og en Aprilia RSV Mille fra 1999 i Classic Superbike Hyggerace på danske og svenske baner."
   author = { name = "Tommy Eriksen", email = "r@teamgummiarm.dk" }
   keywords ="team gummiarm,classic superbike,hyggerace,aprilia rsv mille"
 
@@ -44,11 +44,9 @@ timeZone = 'Europe/Copenhagen'
   creditsText = "Bilberry Hugo Theme"
   creditsUrl = "https://github.com/Lednerb/bilberry-hugo-theme"
 
+# Only tags are used; the others only produced empty pages in the sitemap.
 [taxonomies]
-  author   = "author"
-  tag      = "tags"
-  category = "categories"
-  series   = "series"
+  tag = "tags"
 
 [sitemap]
   changefreq = "weekly"

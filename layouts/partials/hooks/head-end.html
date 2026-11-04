@@ -6,3 +6,27 @@
 {{- if site.Params.staging }}
 <meta name="robots" content="noindex, nofollow">
 {{- end }}
+{{- /* Twitter/X card: Hugo's twitter_cards template is not used by the theme. A wide image gets the large card, the avatar fallback the small one. */ -}}
+{{- with partial "_funcs/get-page-images" . }}
+  {{- $card := "summary_large_image" -}}
+  {{- with (index . 0).Image }}{{ if lt (div (float .Width) .Height) 1.5 }}{{ $card = "summary" }}{{ end }}{{ end }}
+<meta name="twitter:card" content="{{ $card }}">
+<meta name="twitter:image" content="{{ (index . 0).Permalink }}">
+{{- end }}
+{{- /* Structured data (schema.org JSON-LD). Tommy's Person @id is the one tommyeriksen.dk publishes, so search engines can tie the two sites together. */ -}}
+{{- $person := dict "@type" "Person" "@id" "https://tommyeriksen.dk/#person" "name" site.Params.author.name "url" "https://tommyeriksen.dk/" -}}
+{{- $sameAs := slice -}}
+{{- range site.Params.socialMediaLinks }}{{ if hasPrefix .link "http" }}{{ $sameAs = $sameAs | append .link }}{{ end }}{{ end -}}
+{{- $team := dict "@type" "SportsTeam" "@id" (print site.Home.Permalink "#team") "name" site.Title "url" site.Home.Permalink "sport" "Motorcycle racing" "member" (slice $person) "sameAs" $sameAs -}}
+{{- with partial "_funcs/get-page-images" site.Home }}{{ $team = merge $team (dict "logo" (index . 0).Permalink) }}{{ end -}}
+{{- $graph := slice -}}
+{{- if .IsHome -}}
+  {{- $graph = $graph | append $team (dict "@type" "WebSite" "@id" (print site.Home.Permalink "#website") "url" site.Home.Permalink "name" site.Title "description" site.Params.description "publisher" (dict "@id" (print site.Home.Permalink "#team")) "inLanguage" site.Language.Locale) -}}
+{{- else if and .IsPage (eq .Section "posts") -}}
+  {{- $post := dict "@type" "BlogPosting" "headline" .Title "description" (.Description | default site.Params.description) "url" .Permalink "mainEntityOfPage" .Permalink "datePublished" (.Date.Format "2006-01-02T15:04:05-07:00") "dateModified" (.Lastmod.Format "2006-01-02T15:04:05-07:00") "author" $person "publisher" (dict "@type" "SportsTeam" "@id" (print site.Home.Permalink "#team") "name" site.Title) "inLanguage" site.Language.Locale -}}
+  {{- with partial "_funcs/get-page-images" . }}{{ $post = merge $post (dict "image" (index . 0).Permalink) }}{{ end -}}
+  {{- $graph = $graph | append $post -}}
+{{- end -}}
+{{- with $graph }}
+<script type="application/ld+json">{{ dict "@context" "https://schema.org" "@graph" . | jsonify | safeJS }}</script>
+{{- end }}
