@@ -1,5 +1,6 @@
 +++
 title = 'Om'
+description = 'Team Gummiarm er Tommy Eriksen, bidt af en gal kneeslider, og en let temperamentsfuld Aprilia RSV Mille fra 1999.'
 date = '2026-03-30'
 draft = false
 +++
