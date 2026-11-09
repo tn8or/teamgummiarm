@@ -29,6 +29,7 @@ RUN echo "Building as of ${BUILD_TIME:-now}" && \
 # Stage 2: Serve with nginx
 FROM nginx:1.31.8-alpine
 COPY --from=builder /src/public /usr/share/nginx/html
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
-COPY nginx/conf.d/ /etc/nginx/conf.d/
-EXPOSE 80
+COPY --chmod=644 nginx/nginx.conf /etc/nginx/nginx.conf
+COPY --chmod=644 nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
+USER nginx
+EXPOSE 8080
