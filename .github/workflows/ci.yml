@@ -97,6 +97,14 @@ jobs:
 
             [registry."dockerhub-proxy.github-arc.svc.cluster.local:5000"]
               http = true
+              insecure = true
+
+            [registry."ghcr.io"]
+              mirrors = ["ghcr-proxy.github-arc.svc.cluster.local:5000"]
+
+            [registry."ghcr-proxy.github-arc.svc.cluster.local:5000"]
+              http = true
+              insecure = true
 
       - name: Build container
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
@@ -194,6 +202,14 @@ jobs:
 
             [registry."dockerhub-proxy.github-arc.svc.cluster.local:5000"]
               http = true
+              insecure = true
+
+            [registry."ghcr.io"]
+              mirrors = ["ghcr-proxy.github-arc.svc.cluster.local:5000"]
+
+            [registry."ghcr-proxy.github-arc.svc.cluster.local:5000"]
+              http = true
+              insecure = true
 
       - name: Log in to GHCR
         uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4
