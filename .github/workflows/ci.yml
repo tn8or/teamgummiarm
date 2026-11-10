@@ -98,6 +98,9 @@ jobs:
             fi
           done
 
+      # Node 26+ is linked against libatomic.so.1. The self-hosted runner does
+      # not have it, so setup-node exits 127 and the deploy job is skipped.
+      # Stay on 24 (renovate.json pins this) until the runner image ships libatomic.
       - name: Set up Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -152,6 +155,9 @@ jobs:
           name: site
           path: out/
 
+      # Node 26+ is linked against libatomic.so.1. The self-hosted runner does
+      # not have it, so setup-node exits 127 and the deploy job is skipped.
+      # Stay on 24 (renovate.json pins this) until the runner image ships libatomic.
       - name: Set up Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
