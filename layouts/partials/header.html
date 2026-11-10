@@ -1,3 +1,8 @@
+{{- /*
+  Copy of the Bilberry theme's partials/header.html (WEBS-27). Change: logo/
+  avatar alt uses params.author.name (table) instead of the whole author
+  value. Re-copy and re-apply if the theme's header changes.
+*/ -}}
 {{ if and .Site.Params.permanentTopNav .Site.Params.stickyNav }}
     <header class="sticky">
 {{ else }}
