@@ -1,0 +1,28 @@
+// Cloudflare Workers static assets for teamgummiarm.dk. CI builds Hugo into
+// ./public and runs `wrangler deploy` (production) or `wrangler deploy --env
+// staging`. Hostnames are attached as Workers routes by
+// scripts/cloudflare-cutover.sh, not here, so the CI token only needs
+// Workers Scripts edit rights.
+{
+  "name": "teamgummiarm",
+  "account_id": "41d50f6affa3ee547a0a40ce3ced46a9",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "send_metrics": false,
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "not_found_handling": "404-page"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "env": {
+    "staging": {
+      "name": "teamgummiarm-staging"
+    }
+  }
+}

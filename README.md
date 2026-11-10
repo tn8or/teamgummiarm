@@ -1,13 +1,13 @@
 # teamgummiarm.dk
 
-Team Gummiarm Racing #393, in Danish. Hugo (theme bilberry), served by nginx in a container. See `AGENTS.md` for the build details.
+Team Gummiarm Racing #393, in Danish. Hugo (theme bilberry), served by a Cloudflare Worker with static assets. See `AGENTS.md` for the build details.
 
 ## Publishing a post
 
 1. Add the post as a page bundle: `content/posts/<slug>/index.md` plus its images.
 2. Open a PR, then run the CI workflow from the Actions tab on its branch to preview it on https://staging.teamgummiarm.dk/ (future-dated posts are included there).
 3. Merge when it's approved. The merge does not have to wait for the publishing day.
-4. The post goes live on its `date` at 08:00 Copenhagen time in summer, 07:00 in winter (06:00 UTC): a scheduled build of `main` runs every morning and pushes `:latest`. A post merged on or after its date goes live with that merge.
+4. The post goes live on its `date` at 08:00 Copenhagen time in summer, 07:00 in winter (06:00 UTC): a scheduled build of `main` runs every morning and deploys it. A post merged on or after its date goes live with that merge.
 
 `date` is read in Europe/Copenhagen, so `date = '2026-11-05'` means 5 November. To publish now or rebuild by hand, run the CI workflow from the Actions tab (workflow_dispatch on `main`).
 
@@ -31,4 +31,4 @@ Run it locally with `python3 scripts/lint-front-matter.py`.
 
 ## Staging
 
-PR builds and manual runs on other branches use `https://staging.teamgummiarm.dk/` as baseURL, include future-dated posts and are `noindex`. CI builds and smoke-tests every PR but publishes nothing. To preview a branch, run the CI workflow from the Actions tab on that branch; it pushes `ghcr.io/tn8or/teamgummiarm:staging`, and every build of `main` (merge, morning schedule) also pushes a staging build of `main`, so merged posts can be checked there before their date. Staging shows whichever of the two ran last. Merge PRs promptly rather than keeping several open previews.
+PR builds and manual runs on other branches use `https://staging.teamgummiarm.dk/` as baseURL, include future-dated posts and are `noindex`. CI builds and smoke-tests every PR but publishes nothing. To preview a branch, run the CI workflow from the Actions tab on that branch and approve the `cloudflare-staging` deployment; it deploys the branch to staging, and every build of `main` (merge, morning schedule) also deploys a staging build of `main`, so merged posts can be checked there before their date. Staging shows whichever of the two ran last. Merge PRs promptly rather than keeping several open previews.

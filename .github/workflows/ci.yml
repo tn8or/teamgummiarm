@@ -16,18 +16,20 @@ concurrency:
   # Only PR builds cancel each other; a main build always finishes.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+env:
+  STAGING_URL: https://staging.teamgummiarm.dk/
+  WRANGLER_VERSION: "4.159.0"
+
 jobs:
-  # Lint, build and smoke-test every event. No packages permission: PR code
-  # (agents open PRs from this repo) never runs next to a token that can push.
+  # Lint, build and smoke-test every event. No secrets: PR code (agents open
+  # PRs from this repo) never runs next to the Cloudflare token.
   build:
     runs-on: teamgummiarm
     permissions:
       contents: read
     outputs:
       sha: ${{ steps.commit.outputs.sha }}
-      build_time: ${{ steps.commit.outputs.build_time }}
-      tag: ${{ steps.target.outputs.tag }}
-      staging_url: ${{ steps.target.outputs.staging_url }}
+      deploy: ${{ steps.target.outputs.deploy }}
 
     steps:
       - name: Checkout
@@ -40,15 +42,9 @@ jobs:
           # must not redeploy the older commit over it.
           ref: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref || '' }}
 
-      # The publish job checks out this exact commit.
       - name: Resolve the commit being built
         id: commit
-        # build_time feeds the Hugo layer's cache key. Without it a morning
-        # build of an unchanged main reuses yesterday's cached site, and a
-        # post dated today never goes live (WEBS-14).
-        run: |
-          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          echo "build_time=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Set up Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
@@ -65,184 +61,118 @@ jobs:
           hugo-version: "0.169.0"
           extended: true
 
-      - name: Build site
-        run: hugo --minify
-
-      # main (push, morning schedule, manual run) publishes :latest (production)
-      # and a :staging build of main. Otherwise :staging comes only from a
-      # manual run on another branch. PRs never publish: cloud agents push and
-      # open PRs as the repo owner, so neither the PR author nor the actor
-      # tells an agent's PR from Tommy's.
-      - name: Decide what to publish
+      # A build of main deploys production and refreshes staging with a build
+      # of main that includes future-dated posts, to preview merged posts
+      # before their date. A manual run on another branch deploys that branch
+      # to staging. PRs are staging builds that deploy nothing: cloud agents
+      # push and open PRs as the repo owner, so neither the PR author nor the
+      # actor tells an agent's PR from Tommy's.
+      - name: Decide what to build and deploy
         id: target
         env:
           EVENT: ${{ github.event_name }}
           REF: ${{ github.ref }}
         run: |
           if [ "$EVENT" = pull_request ]; then
-            # PR builds are always staging builds, published or not.
-            echo staging_url=https://staging.teamgummiarm.dk/ >> "$GITHUB_OUTPUT"
+            echo "variants=staging" >> "$GITHUB_OUTPUT"
           elif [ "$REF" = refs/heads/main ]; then
-            echo tag=latest >> "$GITHUB_OUTPUT"
+            echo "variants=production staging" >> "$GITHUB_OUTPUT"
+            echo deploy=main >> "$GITHUB_OUTPUT"
           elif [ "$EVENT" = workflow_dispatch ]; then
-            echo tag=staging >> "$GITHUB_OUTPUT"
-            echo staging_url=https://staging.teamgummiarm.dk/ >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
-        with:
-          buildkitd-config-inline: |
-            [registry."docker.io"]
-              mirrors = ["dockerhub-proxy.github-arc.svc.cluster.local:5000"]
-
-            [registry."dockerhub-proxy.github-arc.svc.cluster.local:5000"]
-              http = true
-              insecure = true
-
-            [registry."ghcr.io"]
-              mirrors = ["ghcr-proxy.github-arc.svc.cluster.local:5000"]
-
-            [registry."ghcr-proxy.github-arc.svc.cluster.local:5000"]
-              http = true
-              insecure = true
-
-      - name: Build container
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
-        with:
-          context: .
-          platforms: linux/amd64
-          load: true
-          tags: teamgummiarm:ci
-          build-args: |
-            BUILD_TIME=${{ steps.commit.outputs.build_time }}
-            STAGING_URL=${{ steps.target.outputs.staging_url }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Smoke test container
-        run: |
-          set -eu
-          name="smoke-${{ github.run_id }}-${{ github.run_attempt }}"
-          docker run -d --name "$name" teamgummiarm:ci
-          trap 'docker logs "$name" || true; docker rm -f "$name" >/dev/null' EXIT
-          echo "nginx master runs as non-root ..."
-          docker exec "$name" sh -c "awk '/^Uid:/ { exit (\$2 == 0) }' /proc/1/status"
-          for i in $(seq 1 20); do
-            docker exec "$name" curl -fsS -o /dev/null http://127.0.0.1:8080/ && break
-            sleep 1
-          done
-          echo "GET / ..."
-          docker exec "$name" curl -fsS -o /dev/null -w '%{http_code} %{content_type}\n' http://127.0.0.1:8080/
-          echo "GET missing page returns 404 ..."
-          code=$(docker exec "$name" curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/ci-smoke-missing)
-          test "$code" = 404
-          echo "GET .md is served inline as UTF-8 markdown ..."
-          docker exec --user 0 "$name" sh -c 'printf "# smoke \342\200\223 test\n" > /usr/share/nginx/html/ci-smoke.md'
-          ctype=$(docker exec "$name" curl -fsS -o /dev/null -w '%{content_type}' http://127.0.0.1:8080/ci-smoke.md)
-          echo "$ctype"
-          test "$ctype" = "text/markdown; charset=utf-8"
-          echo "Content negotiation: HTML by default, Markdown on Accept: text/markdown ..."
-          check() { # path, Accept header, expected content type
-            out=$(docker exec "$name" curl -fsS -D - -o /tmp/body -H "Accept: $2" "http://127.0.0.1:8080$1")
-            echo "$1 [$2] -> $(echo "$out" | grep -i '^content-type:' | tr -d '\r')"
-            echo "$out" | grep -qi "^content-type: $3"
-            echo "$out" | grep -qi '^vary: .*accept'
-            echo "$out" | grep -qi '^cache-control: private'
-          }
-          browser='text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-          for path in / /about/ /posts/; do
-            check "$path" "$browser" "text/html"
-            check "$path" "*/*" "text/html"
-            check "$path" "text/markdown" "text/markdown; charset=utf-8"
-            docker exec "$name" head -n 1 /tmp/body | grep -q '^# '
-            check "$path" "text/markdown, text/html;q=0.9" "text/markdown"
-            check "$path" "text/markdown;q=0, text/html" "text/html"
-          done
-          echo "GET /robots.txt is 200 text/plain with content signals and a sitemap ..."
-          out=$(docker exec "$name" curl -fsS -w '\n%{http_code} %{content_type}' http://127.0.0.1:8080/robots.txt)
-          echo "$out"
-          echo "$out" | tail -n1 | grep -q '^200 text/plain'
-          echo "$out" | grep -q '^User-agent: \*$'
-          echo "$out" | grep -q '^Content-Signal: search=yes, ai-input=yes, ai-train=yes$'
-          echo "$out" | grep -q '^Sitemap: https://.*/sitemap\.xml$'
-          if [ -n "${{ steps.target.outputs.staging_url }}" ]; then
-            echo "Staging build is not indexable ..."
-            echo "$out" | grep -q '^Disallow: /$'
-            docker exec "$name" curl -fsS http://127.0.0.1:8080/ | grep -Eq '<meta name="?robots"? content="noindex'
+            echo "variants=staging" >> "$GITHUB_OUTPUT"
+            echo deploy=branch >> "$GITHUB_OUTPUT"
           else
-            echo "Production build is indexable ..."
-            echo "$out" | grep -q '^Allow: /$'
-            if docker exec "$name" curl -fsS http://127.0.0.1:8080/ | grep -q noindex; then
-              echo "Production page has noindex"; exit 1
-            fi
+            echo "variants=staging" >> "$GITHUB_OUTPUT"
           fi
 
-  publish:
+      - name: Build site
+        env:
+          HUGO_PARAMS_commit: ${{ steps.commit.outputs.sha }}
+          VARIANTS: ${{ steps.target.outputs.variants }}
+        run: |
+          for variant in $VARIANTS; do
+            if [ "$variant" = staging ]; then
+              HUGO_PARAMS_staging=true hugo --minify --baseURL "$STAGING_URL" --buildFuture --destination "out/$variant"
+            else
+              hugo --minify --destination "out/$variant"
+            fi
+          done
+
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+
+      - name: Install wrangler
+        run: |
+          npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/wrangler" "wrangler@$WRANGLER_VERSION"
+          echo "$RUNNER_TEMP/wrangler/node_modules/.bin" >> "$GITHUB_PATH"
+
+      - name: Smoke test through the Worker (wrangler dev)
+        env:
+          VARIANTS: ${{ steps.target.outputs.variants }}
+        run: |
+          for variant in $VARIANTS; do
+            rm -rf public && cp -r "out/$variant" public
+            scripts/smoke-test.sh "$variant"
+          done
+
+      - name: Upload the tested build
+        if: steps.target.outputs.deploy != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site
+          path: out/
+          retention-days: 7
+          if-no-files-found: error
+
+  # Both environments hold CLOUDFLARE_API_TOKEN. `cloudflare` only allows
+  # main; `cloudflare-staging` allows any branch but needs Tommy's approval,
+  # so a workflow changed in a PR can't reach the token unattended.
+  deploy:
     needs: build
-    if: needs.build.outputs.tag != ''
+    if: needs.build.outputs.deploy != ''
     runs-on: teamgummiarm
+    environment: ${{ needs.build.outputs.deploy == 'main' && 'cloudflare' || 'cloudflare-staging' }}
     permissions:
       contents: read
-      packages: write
 
     steps:
       - name: Checkout the commit that was built
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          submodules: recursive
           persist-credentials: false
           ref: ${{ needs.build.outputs.sha }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+      - name: Download the tested build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          buildkitd-config-inline: |
-            [registry."docker.io"]
-              mirrors = ["dockerhub-proxy.github-arc.svc.cluster.local:5000"]
+          name: site
+          path: out/
 
-            [registry."dockerhub-proxy.github-arc.svc.cluster.local:5000"]
-              http = true
-              insecure = true
-
-            [registry."ghcr.io"]
-              mirrors = ["ghcr-proxy.github-arc.svc.cluster.local:5000"]
-
-            [registry."ghcr-proxy.github-arc.svc.cluster.local:5000"]
-              http = true
-              insecure = true
-
-      - name: Log in to GHCR
-        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          node-version: "24"
 
-      # Same inputs as the build job, so this reuses its cached layers.
-      - name: Push container
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
-        with:
-          context: .
-          platforms: linux/amd64
-          push: true
-          tags: ghcr.io/tn8or/teamgummiarm:${{ needs.build.outputs.tag }}
-          build-args: |
-            BUILD_TIME=${{ needs.build.outputs.build_time }}
-            STAGING_URL=${{ needs.build.outputs.staging_url }}
-          cache-from: type=gha
+      - name: Install wrangler
+        run: |
+          npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/wrangler" "wrangler@$WRANGLER_VERSION"
+          echo "$RUNNER_TEMP/wrangler/node_modules/.bin" >> "$GITHUB_PATH"
 
-      # A main build also refreshes staging with future-dated posts included,
-      # to preview merged posts before their publishing date.
-      - name: Push staging image built from main
-        if: needs.build.outputs.tag == 'latest'
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
-        with:
-          context: .
-          platforms: linux/amd64
-          push: true
-          tags: ghcr.io/tn8or/teamgummiarm:staging
-          build-args: |
-            BUILD_TIME=${{ needs.build.outputs.build_time }}
-            STAGING_URL=https://staging.teamgummiarm.dk/
-          cache-from: type=gha
+      - name: Deploy production
+        if: needs.build.outputs.deploy == 'main'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          SHA: ${{ needs.build.outputs.sha }}
+        run: |
+          rm -rf public && mv out/production public
+          wrangler deploy --message "$SHA"
+
+      - name: Deploy staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          SHA: ${{ needs.build.outputs.sha }}
+        run: |
+          rm -rf public && mv out/staging public
+          wrangler deploy --env staging --message "$SHA"
