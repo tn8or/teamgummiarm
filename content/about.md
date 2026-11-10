@@ -6,3 +6,5 @@ draft = false
 +++
 
 Teamet består af Tommy Eriksen, bidt af en gal kneeslider, og den let temperamentsfulde Aprilia RSV Mille cykel fra 1999.
+
+Tommy skriver også om cloud, platforme og AI-agenter på [tommyeriksen.dk](https://tommyeriksen.dk/).
