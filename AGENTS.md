@@ -16,7 +16,7 @@ Work on this repo is tracked in itsaplan project `WEBS` (MCP: https://itsaplan-a
 
 ## The site
 
-- Hugo 0.167.0 extended. The theme is a git submodule under `themes/`; clone with `--recurse-submodules`.
+- Hugo extended, version pinned only in `.github/workflows/ci.yml` (`hugo-version`, bumped by Renovate). The theme is a git submodule under `themes/`; clone with `--recurse-submodules`.
 - Hosting: Cloudflare Workers static assets (`wrangler.jsonc`). CI builds Hugo into `public/` and deploys it with wrangler; `worker/index.js` runs in front of every request (`run_worker_first`) and does what nginx used to: Markdown negotiation (`Accept: text/markdown` gets the page's `index.md`), `text/markdown; charset=utf-8`, `Vary: Accept`, `Cache-Control: private, no-cache` on pages, and www → apex. Missing pages get Hugo's `404.html`. Hostnames are Workers routes managed by `scripts/cloudflare-cutover.sh` (status, route, dns, rollback), not by wrangler, so the CI token only needs Workers Scripts edit rights.
 - Content: posts in `content/posts/`, page bundles for posts with images (`content/posts/<slug>/index.md` + images). TOML front matter (`+++`) with date, title, draft.
 - Tags: everything here is in the `motorcycles` series, so every post gets `tags = ['motorcycles']`, plus an optional topic tag only where it clearly fits (`lessons-learned`, `leadership`, `ai-in-practice`). Same scheme as tommyeriksen.dk (documented in itsaplan, context doc 8). The theme shows tags in the article footer; `content/tags/<tag>/_index.md` sets the Danish display title (`motorcycles` = "Motorcykler", `lessons-learned` = "Erfaringer").
