@@ -47,7 +47,9 @@
   "packageRules": [
     {
       "description": "Node 26+ links libatomic.so.1, which the self-hosted runner does not provide. setup-node exits 127 and deploys are skipped. Stay on Node 24.",
-      "matchDatasources": ["node-version"],
+      "matchManagers": ["github-actions"],
+      "matchDatasources": ["github-releases"],
+      "matchPackageNames": ["node", "actions/node-versions"],
       "allowedVersions": "<25"
     }
   ]
