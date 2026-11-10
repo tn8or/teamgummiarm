@@ -6,7 +6,6 @@
   ],
   "enabledManagers": [
     "custom.regex",
-    "dockerfile",
     "github-actions",
     "git-submodules"
   ],
@@ -21,6 +20,17 @@
       ],
       "depNameTemplate": "gohugoio/hugo",
       "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.*\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "WRANGLER_VERSION:\\s*[\"']?(?<currentValue>\\d+\\.\\d+\\.\\d+)[\"']?"
+      ],
+      "depNameTemplate": "wrangler",
+      "datasourceTemplate": "npm"
     }
   ],
   "minimumReleaseAge": "2 days",
