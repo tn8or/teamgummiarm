@@ -112,9 +112,11 @@ jobs:
         env:
           VARIANTS: ${{ steps.target.outputs.variants }}
         run: |
+          port=8787
           for variant in $VARIANTS; do
             rm -rf public && cp -r "out/$variant" public
-            scripts/smoke-test.sh "$variant"
+            SMOKE_PORT=$port scripts/smoke-test.sh "$variant"
+            port=$((port + 1))
           done
 
       - name: Upload the tested build

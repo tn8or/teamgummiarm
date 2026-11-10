@@ -18,11 +18,16 @@ trap 'rm -f public/ci-smoke.md' EXIT
 
 wrangler dev --ip 127.0.0.1 --port "$port" --show-interactive-dev-session=false >"$log" 2>&1 &
 pid=$!
-trap 'kill $pid 2>/dev/null || true; rm -f public/ci-smoke.md; echo "--- wrangler dev log"; cat "$log"' EXIT
+# Stop wrangler and its workerd child and wait for them, so the next run can
+# bind the port.
+trap 'pkill -P $pid 2>/dev/null || true; kill $pid 2>/dev/null || true; wait $pid 2>/dev/null || true; rm -f public/ci-smoke.md; echo "--- wrangler dev log"; cat "$log"' EXIT
+ready=
 for _ in $(seq 1 60); do
-  curl -fsS -o /dev/null "$base/" 2>/dev/null && break
+  kill -0 $pid 2>/dev/null || { echo "wrangler dev exited"; exit 1; }
+  curl -fsS -o /dev/null "$base/" 2>/dev/null && { ready=1; break; }
   sleep 1
 done
+[ -n "$ready" ] || { echo "wrangler dev did not answer on $base"; exit 1; }
 
 echo "GET / ..."
 curl -fsS -o /dev/null -w '%{http_code} %{content_type}\n' "$base/"
