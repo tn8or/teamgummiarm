@@ -89,7 +89,11 @@ for asset in $(grep -Eo '/(bilberry/)?theme[a-z-]*\.[0-9a-f]{64}\.(css|js)' <<<"
   out=$(curl -fsS -o /dev/null -D - "$base$asset")
   echo "$asset -> $(echo "$out" | grep -i '^cache-control:' | tr -d '\r')"
   echo "$out" | head -n1 | grep -q ' 200'
-  echo "$out" | grep -Eqi '^cache-control: public, max-age=[0-9]{7}'
+  case $asset in
+    /fonts/*) expected='public, max-age=2592000' ;;
+    *) expected='public, max-age=31536000, immutable' ;;
+  esac
+  echo "$out" | tr -d '\r' | grep -qix "cache-control: $expected"
 done
 
 echo "Smoke test passed ($variant)."
