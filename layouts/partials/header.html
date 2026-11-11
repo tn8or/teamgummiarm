@@ -1,7 +1,8 @@
 {{- /*
   Copy of the Bilberry theme's partials/header.html (WEBS-27). Change: logo/
   avatar alt uses params.author.name (table) instead of the whole author
-  value. Re-copy and re-apply if the theme's header changes.
+  value. WEBS-30: the custom image is served resized (picture, WebP
+  + PNG). Re-copy and re-apply if the theme's header changes.
 */ -}}
 {{ if and .Site.Params.permanentTopNav .Site.Params.stickyNav }}
     <header class="sticky">
@@ -12,7 +13,19 @@
         <div class="logo">
             <a href="{{ .Site.BaseURL | relLangURL }}" class="logo">
                 {{ if and (isset .Site.Params "customimage") (ne .Site.Params.customImage "") }}
-                    <img src="{{ .Site.Params.customImage | relURL }}" alt="{{ .Site.Params.author.name | default .Site.Title }}">
+                    {{- /* WEBS-30: shown at 158x105; serve a 2x copy (WebP with
+                         PNG fallback) instead of the 2000px original. */}}
+                    {{- $alt := .Site.Params.author.name | default .Site.Title }}
+                    {{- with resources.Get (strings.TrimPrefix "/" .Site.Params.customImage) }}
+                    {{- $png := .Resize "316x png Lanczos" }}
+                    {{- $webp := .Resize "316x webp q85 Lanczos" }}
+                    <picture style="display: contents">
+                        <source srcset="{{ $webp.RelPermalink }}" type="image/webp">
+                        <img src="{{ $png.RelPermalink }}" width="{{ div $png.Width 2 }}" height="{{ div $png.Height 2 }}" style="height: auto" decoding="async" alt="{{ $alt }}">
+                    </picture>
+                    {{- else }}
+                    <img src="{{ .Site.Params.customImage | relURL }}" alt="{{ $alt }}">
+                    {{- end }}
                 {{ else }}
                     {{ $avatarEmail := "" }}
                     {{ if not (eq .Site.Params.avatarEmail nil) }}

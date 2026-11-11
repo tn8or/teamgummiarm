@@ -8,6 +8,11 @@
   plain img.
 */ -}}
 {{- $src := .Destination -}}
+{{- /* WEBS-30: the first image in a body is the hero on a post page and, for
+     the newest post, the LCP element on the front page: load it eagerly with
+     high priority. partials/article-wrapper.html turns it back to lazy for
+     every post after the first in a list. */ -}}
+{{- $loading := cond (eq .Ordinal 0) `fetchpriority="high"` `loading="lazy"` -}}
 {{- $res := "" -}}
 {{- if and (not (urls.Parse $src).Scheme) (not (hasPrefix $src "/")) -}}
   {{- $res = .PageInner.Resources.Get $src -}}
@@ -27,8 +32,8 @@
     {{- $srcset = $srcset | append (printf "%s %dw" $fallback.RelPermalink $res.Width) -}}
   {{- end -}}
   {{- $full := $res.Fit "3000x3000 q85" -}}
-  <a href="{{ $full.RelPermalink }}"><img src="{{ $fallback.RelPermalink }}" srcset="{{ delimit $srcset ", " }}" sizes="(max-width: 800px) 100vw, 800px" width="{{ $fallback.Width }}" height="{{ $fallback.Height }}" style="height: auto" loading="lazy" decoding="async" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }}></a>
+  <a href="{{ $full.RelPermalink }}"><img src="{{ $fallback.RelPermalink }}" srcset="{{ delimit $srcset ", " }}" sizes="(max-width: 800px) 100vw, 800px" width="{{ $fallback.Width }}" height="{{ $fallback.Height }}" style="height: auto" {{ $loading | safeHTMLAttr }} decoding="async" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }}></a>
 {{- else -}}
   {{- with $res -}}{{- $src = .RelPermalink -}}{{- end -}}
-  <img src="{{ $src | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy">
+  <img src="{{ $src | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} {{ $loading | safeHTMLAttr }}>
 {{- end -}}
