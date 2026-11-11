@@ -24,7 +24,7 @@ export default {
       response = await markdown(request, url, env);
     }
     response ??= await env.ASSETS.fetch(request);
-    return withHeaders(response);
+    return withHeaders(response, url.pathname);
   },
 };
 
@@ -37,7 +37,21 @@ async function markdown(request, url, env) {
   return response.ok || response.status === 304 ? response : null;
 }
 
-function withHeaders(original) {
+// Browser cache lifetimes for assets (WEBS-31); everything else keeps the
+// asset server's default (max-age=0, must-revalidate).
+// - Fingerprinted files never change under the same name: Hugo's processed
+//   images (name_hu_<hash>.ext) and fingerprinted CSS/JS (name.<sha256>.ext).
+// - Fonts are not fingerprinted but practically never change.
+const IMMUTABLE = /(_hu_[0-9a-f]+\.[a-z0-9]+|\.[0-9a-f]{64}\.(css|js))$/i;
+const FONT = /^\/fonts\/.+\.(woff2?|ttf|eot|otf)$/i;
+
+function assetCacheControl(pathname) {
+  if (IMMUTABLE.test(pathname)) return "public, max-age=31536000, immutable";
+  if (FONT.test(pathname)) return "public, max-age=2592000";
+  return null;
+}
+
+function withHeaders(original, pathname) {
   const response = new Response(original.body, original);
   const headers = response.headers;
 
@@ -53,6 +67,9 @@ function withHeaders(original) {
   headers.append("Vary", "Accept");
   if (/^text\/(html|markdown)/i.test(headers.get("Content-Type") || "")) {
     headers.set("Cache-Control", "private, no-cache");
+  } else if (original.ok || original.status === 304) {
+    const cache = assetCacheControl(pathname);
+    if (cache) headers.set("Cache-Control", cache);
   }
 
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) {

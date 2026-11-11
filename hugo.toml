@@ -25,7 +25,11 @@ timeZone = 'Europe/Copenhagen'
   customImage = "/images/avatar.png"
   overlayIcon = "fa-home"
 
-  enableMomentJs = true
+  # No moment.js (WEBS-31): it was ~530 KB of the theme JS and only printed
+  # the post date. layouts/partials/default-content.html formats it with
+  # time.Format in the site locale instead ("10. november 2026").
+  enableMomentJs = false
+  dateFormat = "2. January 2006"
   # No code blocks on the site: load the theme JS build without highlight.js
   # (about half the size; WEBS-30).
   enableHighlightJs = false
@@ -78,11 +82,35 @@ timeZone = 'Europe/Copenhagen'
 [[module.mounts]]
   source = "static/images/avatar.png"
   target = "assets/images/avatar.png"
-# The theme's prebuilt CSS, rewritten by layouts/partials/_funcs/theme-css.html
-# (WEBS-30).
+# The theme's prebuilt CSS and JS, fingerprinted by the layouts so they can be
+# cached: CSS rewritten by layouts/partials/_funcs/theme-css.html (WEBS-30),
+# JS picked in layouts/_default/baseof.html (WEBS-31).
 [[module.mounts]]
   source = "themes/bilberry-hugo-theme/static/theme.css"
   target = "assets/bilberry/theme.css"
+[[module.mounts]]
+  source = "themes/bilberry-hugo-theme/static/theme-exclude-moment-and-highlight.js"
+  target = "assets/bilberry/theme-exclude-moment-and-highlight.js"
+[[module.mounts]]
+  source = "themes/bilberry-hugo-theme/static/theme-exclude-moment.js"
+  target = "assets/bilberry/theme-exclude-moment.js"
+[[module.mounts]]
+  source = "themes/bilberry-hugo-theme/static/theme-exclude-highlight.js"
+  target = "assets/bilberry/theme-exclude-highlight.js"
+[[module.mounts]]
+  source = "themes/bilberry-hugo-theme/static/theme.js"
+  target = "assets/bilberry/theme.js"
+# Font Awesome's fonts under a path without "@" (WEBS-31): Cloudflare answers
+# the theme's /fonts/_vendor/@fortawesome/... with a 307 to the %40 spelling,
+# which Chrome loops on, so the icons never loaded. theme-css.html points the
+# CSS here. Declaring a static mount drops the default one, so static/ is
+# mounted explicitly too.
+[[module.mounts]]
+  source = "static"
+  target = "static"
+[[module.mounts]]
+  source = "themes/bilberry-hugo-theme/static/fonts/_vendor/@fortawesome/fontawesome-free"
+  target = "static/fonts/fa"
 
 # Don't publish raw page-bundle files (multi-MB originals with EXIF). Only
 # what a template uses gets published: resized images, the 3000px full-size
