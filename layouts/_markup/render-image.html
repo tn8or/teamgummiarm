@@ -6,6 +6,9 @@
   resolved to permalinks so they also work where the post body is rendered on
   another page (front page, lists). Remote images, static files, SVG and GIF render as a
   plain img.
+  WEBS-31: `sizes` matches the theme's layout (the article body is 100vw - 92px
+  up to an 800px viewport, then 636px), and a 640w step fits phones (320px at
+  DPR 1.75-2) and desktop, so neither downloads the 800w image.
 */ -}}
 {{- $src := .Destination -}}
 {{- /* WEBS-30: the first image in a body is the hero on a post page and, for
@@ -20,7 +23,7 @@
 {{- if and $res (eq $res.MediaType.MainType "image") (not (in (slice "svg" "gif") $res.MediaType.SubType)) -}}
   {{- $srcset := slice -}}
   {{- $fallback := "" -}}
-  {{- range $w := slice 480 800 1200 1600 -}}
+  {{- range $w := slice 480 640 800 1200 1600 -}}
     {{- if lt $w $res.Width -}}
       {{- $img := $res.Resize (printf "%dx webp q80" $w) -}}
       {{- $srcset = $srcset | append (printf "%s %dw" $img.RelPermalink $w) -}}
@@ -32,7 +35,7 @@
     {{- $srcset = $srcset | append (printf "%s %dw" $fallback.RelPermalink $res.Width) -}}
   {{- end -}}
   {{- $full := $res.Fit "3000x3000 q85" -}}
-  <a href="{{ $full.RelPermalink }}"><img src="{{ $fallback.RelPermalink }}" srcset="{{ delimit $srcset ", " }}" sizes="(max-width: 800px) 100vw, 800px" width="{{ $fallback.Width }}" height="{{ $fallback.Height }}" style="height: auto" {{ $loading | safeHTMLAttr }} decoding="async" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }}></a>
+  <a href="{{ $full.RelPermalink }}"><img src="{{ $fallback.RelPermalink }}" srcset="{{ delimit $srcset ", " }}" sizes="(max-width: 800px) calc(100vw - 92px), 636px" width="{{ $fallback.Width }}" height="{{ $fallback.Height }}" style="height: auto" {{ $loading | safeHTMLAttr }} decoding="async" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }}></a>
 {{- else -}}
   {{- with $res -}}{{- $src = .RelPermalink -}}{{- end -}}
   <img src="{{ $src | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} {{ $loading | safeHTMLAttr }}>

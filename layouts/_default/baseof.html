@@ -4,7 +4,7 @@
   and meta description uses the page's own description (the theme always
   printed params.description). WEBS-30: inline no-js swap instead of
   modernizr, rewritten theme.css plus font preloads, theme JS deferred.
-  WEBS-31: theme JS fingerprinted.
+  WEBS-31: theme JS fingerprinted; the page body is a <main> landmark.
   Re-copy and re-apply if the theme's baseof
   changes.
 */ -}}
@@ -126,9 +126,9 @@
 
     {{ partial "header.html" . }}
 
-    <div class="main container">
+    <main class="main container">
         {{ block "main" . }}{{ end }}
-    </div>
+    </main>
 
     {{ partial "footer.html" . }}
 

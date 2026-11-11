@@ -1,6 +1,7 @@
 {{- /*
   Copy of the Bilberry theme's partials/footer.html (WEBS-27). Change: related-
-  sites block with a visible link to tommyeriksen.dk. Re-copy and re-apply if
+  sites block with a visible link to tommyeriksen.dk. WEBS-31: social icon
+  links get an aria-label (params.socialMediaLinks label). Re-copy and re-apply if
   the theme's footer changes.
 */ -}}
 {{ if .Site.Params.showFooter | default true }}
@@ -44,7 +45,7 @@
             <div class="external-profiles">
                 <strong>{{ i18n "socialMedia" }}</strong>
                 {{ range .Site.Params.socialMediaLinks }}
-                <a href="{{ .link }}" target="_blank" rel="{{ .rel }}"><em class="{{ .icon }}"></em></a>
+                <a href="{{ .link }}" target="_blank" rel="{{ .rel }}" aria-label="{{ .label | default .link }}"><em class="{{ .icon }}" aria-hidden="true"></em></a>
                 {{ end }}
             </div>
             {{ end }}

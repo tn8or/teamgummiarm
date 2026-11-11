@@ -38,11 +38,12 @@ timeZone = 'Europe/Copenhagen'
   amountCategoriesInFooter = -1
   showArchive = false
   showSocialMedia = true
+  # label is the icon link's aria-label (layouts/partials/footer.html, WEBS-31).
   socialMediaLinks = [
-    { link = "https://instagram.com/teamgummiarm", icon = "fab fa-instagram", rel = "me" },
-    { link = "https://facebook.com/teamgummiarm", icon = "fab fa-facebook", rel = "me" },
-    { link = "https://youtube.com/@teamgummiarm", icon = "fab fa-youtube", rel = "me" },
-    { link = "mailto:r@teamgummiarm.dk", icon = "fas fa-envelope" },
+    { label = "Instagram", link = "https://instagram.com/teamgummiarm", icon = "fab fa-instagram", rel = "me" },
+    { label = "Facebook", link = "https://facebook.com/teamgummiarm", icon = "fab fa-facebook", rel = "me" },
+    { label = "YouTube", link = "https://youtube.com/@teamgummiarm", icon = "fab fa-youtube", rel = "me" },
+    { label = "E-mail", link = "mailto:r@teamgummiarm.dk", icon = "fas fa-envelope" },
   ]
   copyrightBy = "Tommy Eriksen"
   copyrightUseCurrentYear = false
