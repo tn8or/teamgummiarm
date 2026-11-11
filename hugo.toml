@@ -26,6 +26,9 @@ timeZone = 'Europe/Copenhagen'
   overlayIcon = "fa-home"
 
   enableMomentJs = true
+  # No code blocks on the site: load the theme JS build without highlight.js
+  # (about half the size; WEBS-30).
+  enableHighlightJs = false
   showFooter = true
   amountLatestPostsInFooter = 5
   amountCategoriesInFooter = -1
@@ -75,6 +78,11 @@ timeZone = 'Europe/Copenhagen'
 [[module.mounts]]
   source = "static/images/avatar.png"
   target = "assets/images/avatar.png"
+# The theme's prebuilt CSS, rewritten by layouts/partials/_funcs/theme-css.html
+# (WEBS-30).
+[[module.mounts]]
+  source = "themes/bilberry-hugo-theme/static/theme.css"
+  target = "assets/bilberry/theme.css"
 
 # Don't publish raw page-bundle files (multi-MB originals with EXIF). Only
 # what a template uses gets published: resized images, the 3000px full-size

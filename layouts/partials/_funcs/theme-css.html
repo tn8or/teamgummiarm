@@ -1,0 +1,15 @@
+{{- /*
+  The theme's prebuilt theme.css, adjusted at build time (WEBS-30):
+  - Font Awesome's @font-face rules use font-display:block; swap them so text
+    and icons aren't invisible while the icon fonts load.
+  - The text fonts' woff2 files point to latin/latin-ext subsets in
+    static/fonts/subset/ (Greek, Cyrillic and Vietnamese glyphs dropped, about
+    half the size). The other formats stay as fallbacks.
+  Fingerprinted, so it can be cached; published at the site root so the
+  relative ./fonts/ URLs still resolve. theme.css is mounted from the theme's
+  static/ into assets/ (hugo.toml).
+*/ -}}
+{{- $css := resources.Get "bilberry/theme.css" -}}
+{{- $s := replace $css.Content "font-display:block" "font-display:swap" -}}
+{{- $s = replaceRE `\./fonts/([a-z0-9_-]+)\.woff2\?[0-9a-f]+` "./fonts/subset/$1.woff2" $s -}}
+{{- return (resources.FromString "theme.css" $s | fingerprint) -}}

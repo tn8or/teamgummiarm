@@ -1,0 +1,22 @@
+{{- /*
+  Copy of the Bilberry theme's partials/article-wrapper.html (WEBS-30). Change:
+  render-image.html gives the first image of every post fetchpriority="high"
+  (the hero/LCP image). In a list only the first article keeps that; the rest
+  are made lazy again so the front page doesn't eagerly fetch 7 images.
+  Re-copy and re-apply if the theme's article-wrapper changes.
+*/ -}}
+{{ with . }}
+    {{- $n := page.Store.Get "articleWrapperCount" | default 0 }}
+    {{- page.Store.Set "articleWrapperCount" (add $n 1) }}
+    {{- $tpl := "content-type/article.html" }}
+    {{- if or (fileExists (print "layouts/partials/content-type/" .Type ".html") ) (fileExists (print "themes/bilberry-hugo-theme/layouts/partials/content-type/" .Type ".html")) }}
+        {{- $tpl = print "content-type/" .Type ".html" }}
+    {{- end }}
+    {{- $html := partial $tpl (dict "ctx" . "template_type" "multiple") }}
+    {{- if gt $n 0 }}
+        {{- $html = replace $html `fetchpriority="high"` `loading="lazy"` }}
+    {{- end }}
+    <div class="article-wrapper u-cf">
+        {{ $html | safeHTML }}
+    </div>
+{{ end }}

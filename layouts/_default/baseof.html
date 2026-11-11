@@ -2,7 +2,9 @@
   Copy of the Bilberry theme's _default/baseof.html (WEBS-22). Changes, all in
   <head>: meta author prints params.author.name instead of the whole table,
   and meta description uses the page's own description (the theme always
-  printed params.description). Re-copy and re-apply if the theme's baseof
+  printed params.description). WEBS-30: inline no-js swap instead of
+  modernizr, rewritten theme.css plus font preloads, theme JS deferred.
+  Re-copy and re-apply if the theme's baseof
   changes.
 */ -}}
 <!DOCTYPE html>
@@ -81,7 +83,9 @@
 
     {{ partial "favicon.html" . }}
 
-    <script src="{{ "modernizr-simple.js" | relURL }}"></script>
+    {{- /* Replaces the render-blocking modernizr-simple.js (WEBS-30): the
+         theme's build only used it to swap the no-js class on <html> for js. */}}
+    <script>document.documentElement.className=document.documentElement.className.replace(/\bno-js\b/,"js");</script>
 
     {{ with .OutputFormats.Get "RSS" }}
     <link href="{{ .Permalink }}" rel="alternate" type="application/rss+xml" title="{{ $.Site.Title }}" />
@@ -95,7 +99,13 @@
     <link rel="canonical" href="{{ .Permalink }}">
     {{ end }}
 
-    <link rel="stylesheet" href="{{ "theme.css" | absURL }}">
+    {{- /* WEBS-30: rewritten, fingerprinted theme.css (font-display, font
+         subsets), and a preload for the body and heading fonts so they don't
+         wait for the CSS to be parsed. */}}
+    {{- $css := partial "_funcs/theme-css" . }}
+    <link rel="preload" href="{{ "fonts/subset/open-sans-v17-latin-ext_vietnamese_cyrillic-ext_greek-ext-regular.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ "fonts/subset/comfortaa-v28-greek_latin-ext_vietnamese_cyrillic-ext-700.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{{ $css.Permalink }}">
 
     {{ partial "twitter-card.html" . }}
 
@@ -130,13 +140,13 @@
     {{- $noMoment    := not (.Site.Params.enableMomentJs    | default true) -}}
     {{- $noHighlight := not (.Site.Params.enableHighlightJs | default true) -}}
     {{ if and $noMoment $noHighlight }}
-    <script src="{{ "theme-exclude-moment-and-highlight.js" | absURL }}"></script>
+    <script src="{{ "theme-exclude-moment-and-highlight.js" | absURL }}" defer></script>
     {{ else if $noMoment }}
-    <script src="{{ "theme-exclude-moment.js" | absURL }}"></script>
+    <script src="{{ "theme-exclude-moment.js" | absURL }}" defer></script>
     {{ else if $noHighlight }}
-    <script src="{{ "theme-exclude-highlight.js" | absURL }}"></script>
+    <script src="{{ "theme-exclude-highlight.js" | absURL }}" defer></script>
     {{ else }}
-    <script src="{{ "theme.js" | absURL }}"></script>
+    <script src="{{ "theme.js" | absURL }}" defer></script>
     {{ end }}
 
     {{ if isset .Site.Params "js_modules" }}
