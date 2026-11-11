@@ -4,6 +4,7 @@
   and meta description uses the page's own description (the theme always
   printed params.description). WEBS-30: inline no-js swap instead of
   modernizr, rewritten theme.css plus font preloads, theme JS deferred.
+  WEBS-31: theme JS fingerprinted; the page body is a <main> landmark.
   Re-copy and re-apply if the theme's baseof
   changes.
 */ -}}
@@ -125,9 +126,9 @@
 
     {{ partial "header.html" . }}
 
-    <div class="main container">
+    <main class="main container">
         {{ block "main" . }}{{ end }}
-    </div>
+    </main>
 
     {{ partial "footer.html" . }}
 
@@ -137,17 +138,16 @@
     {{ partial "mathjax.html" . }}
     {{ end }}
 
+    {{- /* WEBS-31: the theme JS build is picked as before, but served
+         fingerprinted from assets/bilberry/ (hugo.toml) so it can be cached. */}}
     {{- $noMoment    := not (.Site.Params.enableMomentJs    | default true) -}}
     {{- $noHighlight := not (.Site.Params.enableHighlightJs | default true) -}}
-    {{ if and $noMoment $noHighlight }}
-    <script src="{{ "theme-exclude-moment-and-highlight.js" | absURL }}" defer></script>
-    {{ else if $noMoment }}
-    <script src="{{ "theme-exclude-moment.js" | absURL }}" defer></script>
-    {{ else if $noHighlight }}
-    <script src="{{ "theme-exclude-highlight.js" | absURL }}" defer></script>
-    {{ else }}
-    <script src="{{ "theme.js" | absURL }}" defer></script>
-    {{ end }}
+    {{- $js := "theme.js" -}}
+    {{- if and $noMoment $noHighlight }}{{ $js = "theme-exclude-moment-and-highlight.js" }}
+    {{- else if $noMoment }}{{ $js = "theme-exclude-moment.js" }}
+    {{- else if $noHighlight }}{{ $js = "theme-exclude-highlight.js" }}{{ end }}
+    {{- $js = resources.Get (print "bilberry/" $js) | fingerprint }}
+    <script src="{{ $js.RelPermalink }}" defer></script>
 
     {{ if isset .Site.Params "js_modules" }}
     {{ range .Site.Params.js_modules }}

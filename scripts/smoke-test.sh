@@ -83,4 +83,17 @@ else
     echo "Production page has noindex"; exit 1
   fi
 fi
+
+echo "Fingerprinted CSS/JS are cached as immutable, fonts load without a redirect ..."
+for asset in $(grep -Eo '/(bilberry/)?theme[a-z-]*\.[0-9a-f]{64}\.(css|js)' <<<"$page" | sort -u) /fonts/fa/webfa-solid-900.woff2; do
+  out=$(curl -fsS -o /dev/null -D - "$base$asset")
+  echo "$asset -> $(echo "$out" | grep -i '^cache-control:' | tr -d '\r')"
+  echo "$out" | head -n1 | grep -q ' 200'
+  case $asset in
+    /fonts/*) expected='public, max-age=2592000' ;;
+    *) expected='public, max-age=31536000, immutable' ;;
+  esac
+  echo "$out" | tr -d '\r' | grep -qix "cache-control: $expected"
+done
+
 echo "Smoke test passed ($variant)."
