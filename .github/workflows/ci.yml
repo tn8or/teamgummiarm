@@ -18,7 +18,7 @@ concurrency:
 
 env:
   STAGING_URL: https://staging.teamgummiarm.dk/
-  WRANGLER_VERSION: "4.160.0"
+  WRANGLER_VERSION: "4.160.1"
 
 jobs:
   # Lint, build and smoke-test every event. No secrets: PR code (agents open
