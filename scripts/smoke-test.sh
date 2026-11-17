@@ -85,15 +85,26 @@ else
 fi
 
 echo "Fingerprinted CSS/JS are cached as immutable, fonts load without a redirect ..."
+# Match saved headers, never `echo | head | grep -q`. Under pipefail that
+# pipeline exits 141 when head/grep closes the pipe after the first hit while
+# echo is still writing (echo: write error: Broken pipe). That aborted this
+# loop on the 15 Nov 2026 main build and skipped the deploy.
 for asset in $(grep -Eo '/(bilberry/)?theme[a-z-]*\.[0-9a-f]{64}\.(css|js)' <<<"$page" | sort -u) /fonts/fa/webfa-solid-900.woff2; do
-  out=$(curl -fsS -o /dev/null -D - "$base$asset")
-  echo "$asset -> $(echo "$out" | grep -i '^cache-control:' | tr -d '\r')"
-  echo "$out" | head -n1 | grep -q ' 200'
+  out=$(curl -fsS -o /dev/null -D - "$base$asset" | tr -d '\r')
+  cache=$(grep -i '^cache-control:' <<<"$out" || true)
+  echo "$asset -> $cache"
+  status=${out%%$'\n'*}
+  case "$status" in
+    *' 200'*) ;;
+    *) echo "$asset did not return 200 ($status)"; exit 1 ;;
+  esac
   case $asset in
     /fonts/*) expected='public, max-age=2592000' ;;
     *) expected='public, max-age=31536000, immutable' ;;
   esac
-  echo "$out" | tr -d '\r' | grep -qix "cache-control: $expected"
+  if ! grep -qix "cache-control: $expected" <<<"$out"; then
+    echo "$asset cache-control is not '$expected'"; exit 1
+  fi
 done
 
 echo "Smoke test passed ($variant)."
