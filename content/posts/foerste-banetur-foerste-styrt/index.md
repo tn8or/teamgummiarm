@@ -13,6 +13,8 @@ tags = ['motorcycles', 'lessons-learned']
 
 Min første trackday føltes som det sikreste sted, jeg nogensinde havde kørt. Om søndagen styrtede jeg.
 
+Jeg har skrevet om [årets første tur til Knutstorp](https://teamgummiarm.dk/posts/alene-af-sted-til-knutstorp/).
+
 For nogle år siden var jeg på et motorcykelkursus på bane med instruktør og fandt ud af, at det nok var det sjoveste, jeg kunne lave helt alene. Lidt research og lidt sjælesøgning senere havde jeg købt en dedikeret banecykel og meldt mig til min første trackday.
 
 ## Fredag aften på Knutstorp
